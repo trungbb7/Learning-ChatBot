@@ -1,0 +1,90 @@
+# === Bytecode và file biên dịch Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+
+# === Thư viện C biên dịch ===
+*.so
+
+# === File phân phối / đóng gói ===
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# === PyInstaller ===
+# Thường không cần thiết nếu bạn không dùng PyInstaller trong repo chính
+*.manifest
+*.spec
+
+# === Trình cài đặt (pip, conda, etc.) ===
+pip-log.txt
+pip-delete-this-directory.txt
+*.conda
+*.ipynb_checkpoints
+
+# === Môi trường ảo (Quan trọng!) ===
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# === Django ===
+*.log
+*.pot
+*.sqlite3
+db.sqlite3* # Bao gồm cả file journal nếu có
+media/          # Thường chứa file do người dùng upload, không nên đưa vào Git
+staticfiles/    # File static được collect, nên được tạo lại khi deploy
+local_settings.py # File cài đặt cục bộ, chứa thông tin nhạy cảm
+
+# === File cấu hình/bí mật (Rất quan trọng!) ===
+.env* # Bao gồm .env, .env.local, .env.development, etc.
+!/.env.example # Bỏ comment dòng này nếu bạn muốn commit file .env.example làm mẫu
+
+# === File tạm của hệ điều hành và trình soạn thảo ===
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+# Linux
+*~
+# VS Code (Thư mục cấu hình workspace)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json # Có thể commit những file này nếu muốn chia sẻ cấu hình với team
+
+# === Testing ===
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+
+# === Sphinx documentation ===
+docs/_build/
+
+# === MyPy ===
+.mypy_cache/

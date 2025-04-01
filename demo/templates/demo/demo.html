@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Chatbot Demo
+{% endblock %}
+
+{% block css_files %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-light.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-dark.min.css" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css" integrity="sha512-Jk4AqjWsdSzSWCSuQTfYRIF84Rq/eV0G2+tu07byYwHcbTGfdmLrHjUSwvzp5HvbiqK4ibmNwdcG49Y5RGYPTg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="{% static 'demo/css/demo.css' %}" />
+{% endblock %}
+
+{% block js_files %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="{% static 'demo/js/demo.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+  <body class="hide-header">
+    <header class="header">
+      <!-- Header Greetings -->
+      <h1 class="title">Chatbot Demo</h1>
+    </header>
+    <!-- Chat List / Container -->
+    <div class="chat-list"></div>
+    <!-- Typing Area -->
+    <div class="typing-area">
+      <form action="#" class="typing-form">
+        <div class="input-wrapper">
+          <input type="text" placeholder="Nhập câu hỏi của bạn" class="typing-input" required />
+          <button id="send-message-button" class="icon material-symbols-rounded">send</button>
+        </div>
+        <div class="action-buttons">
+          <!-- <span id="theme-toggle-button" class="icon material-symbols-rounded">light_mode</span> -->
+          <span id="delete-chat-button" class="icon material-symbols-rounded">delete</span>
+        </div>
+      </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="./script.js"></script>
+  </body>
+{% endblock %}
