@@ -57,8 +57,10 @@ const generateAPIResponse = async (incomingMessageDiv) => {
     // Send a POST request to the API with the user's message
 
     // const csrftoken = getCookie("csrftoken");
+    // console.log("csrftoken", csrftoken);
 
     const API_URL = "/chat";
+    console.log("userMessage", userMessage);
     const response = await fetch(API_URL, {
       method: "POST",
       headers: {
