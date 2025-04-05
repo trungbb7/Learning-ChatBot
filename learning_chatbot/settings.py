@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-x5h*f!@7ueohmzqr3zq59cegws-@5j@@pvz8-_f#m(94&^&ma8"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -41,6 +41,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 INSTALLED_APPS = [
     "demo",
+    "demoSumarize",
     "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
