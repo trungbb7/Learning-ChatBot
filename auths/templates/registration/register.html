@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Đăng ký tài khoản
+{% endblock %}
+
+{% block css_files %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link rel="stylesheet" href="{% static 'auths/css/login.css' %}" />
+  <link rel="stylesheet" href="{% static 'auths/css/register.css' %}" />
+{% endblock %}
+
+{% block content %}
+  <div class="wrapper">
+    <div class="title">
+      <span>Đăng ký tài khoản</span>
+    </div>
+
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        {% for field, errors in form.errors.items %}
+          {% for error in errors %}
+            {{ error }}
+          {% endfor %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="needs-validation" novalidate>
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="id_username">Tên đăng nhập</label>
+        <div class="row">
+          <i class="fas fa-user"></i>
+          {{ form.username }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_email">Email</label>
+        <div class="row">
+          <i class="fas fa-envelope"></i>
+          {{ form.email }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_password1">Mật khẩu</label>
+        <div class="row">
+          <i class="fas fa-lock"></i>
+          {{ form.password1 }}
+        </div>
+        <div class="password-requirements">Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ và số</div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_password2">Xác nhận mật khẩu</label>
+        <div class="row">
+          <i class="fas fa-lock"></i>
+          {{ form.password2 }}
+        </div>
+      </div>
+
+      <div class="row button">
+        <input type="submit" value="Đăng ký" />
+      </div>
+
+      <div class="signup-link">
+        Đã có tài khoản? <a href="{% url 'login' %}">Đăng nhập</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

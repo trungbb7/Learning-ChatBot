@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Đăng nhập
+{% endblock %}
+
+{% block css_files %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link rel="stylesheet" href="{% static 'auths/css/login.css' %}" />
+{% endblock %}
+
+{% block content %}
+  <div class="wrapper">
+    <div class="title">
+      <span>Đăng nhập</span>
+    </div>
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        {% for field, errors in form.errors.items %}
+          {% for error in errors %}
+            {{ error }}
+          {% endfor %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="needs-validation" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="row {% if field.errors %}error{% endif %}">
+          <i class="fas {% if field.name == 'username' %}
+              
+              
+              
+              
+              
+              fa-user
+
+
+
+
+
+            {% else %}
+              
+              
+              
+              
+              
+              fa-lock
+
+
+
+
+
+            {% endif %}">
+
+          </i>
+          {{ field }}
+        </div>
+        {% if field.errors %}
+          <div class="error-message">
+            {% for error in field.errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endfor %}
+      <div class="pass">
+        <a href="{% url 'password_reset' %}">Quên mật khẩu?</a>
+      </div>
+      <div class="row button">
+        <input type="submit" value="Đăng nhập" />
+      </div>
+      <div class="signup-link">
+        Chưa có tài khoản? <a href="{% url 'register' %}">Đăng ký ngay</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}
