@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Demo
+{% endblock %}
+
+{% block css_files %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link rel="stylesheet" href="{% static 'css/demo.css' %}" />
+{% endblock %}
+
+{% block js_files %}
+  <script src="js/demo.js"></script>
+{% endblock %}
+
+{% block content %}
+  <header class="hero">
+    <div class="hero-overlay">
+      <nav class="navbar">
+        <h1 class="logo">Infinity<span>Wave</span></h1>
+        <ul class="nav-links">
+          <li>
+            <a href="#features">Features</a>
+          </li>
+          <li>
+            <a href="#about">About</a>
+          </li>
+          <li>
+            <a href="#contact">Contact</a>
+          </li>
+        </ul>
+        <a href="#start" class="btn">Start Now</a>
+      </nav>
+
+      <div class="hero-content">
+        <h1 id="typewriter"></h1>
+        <p>Build extraordinary websites with modern designs and interactive animations.</p>
+        <a href="#learn-more" class="cta-btn">Learn More</a>
+      </div>
+    </div>
+  </header>
+
+  <section id="features" class="features">
+    <div class="feature-item">
+      <div class="feature-icon">🌟</div>
+      <h2>Interactive Design</h2>
+      <p>Experience smooth animations and modern visuals to captivate your audience.</p>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">🚀</div>
+      <h2>Fast Performance</h2>
+      <p>Lightning-fast loading speeds to keep your users engaged and happy.</p>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">💡</div>
+      <h2>Creative Ideas</h2>
+      <p>Unleash your creativity with cutting-edge tools and designs.</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>© 2024 InfinityWave | Designed by Shojib</p>
+    <ul>
+      <li>
+        <a href="#">Privacy Policy</a>
+      </li>
+      <li>
+        <a href="#">Terms of Use</a>
+      </li>
+    </ul>
+  </footer>
+{% endblock %}

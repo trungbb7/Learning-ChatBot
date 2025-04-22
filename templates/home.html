@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Trang chủ
+{% endblock %}
+
+{% block css_files %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+{% endblock %}
+
+{% block js_files %}
+  <script src="{% static 'js/home.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+  <header class="hero">
+    <div class="hero-overlay">
+      <nav class="navbar">
+        <h1 class="logo">AI<span>Learning</span></h1>
+        <ul class="nav-links">
+          <li>
+            <a href="#features">Tính năng</a>
+          </li>
+          <li>
+            <a href="#about">Giới thiệu</a>
+          </li>
+          <li>
+            <a href="#contact">Liên hệ</a>
+          </li>
+        </ul>
+        {% if user.is_authenticated %}
+          <div class="profile-dropdown">
+            <button class="profile-icon-btn"><i class="fas fa-user"></i></button>
+            <div class="dropdown-content">
+              {% comment %} <a href="#"><i class="fas fa-user-circle"></i> Thông tin cá nhân</a> {% endcomment %}
+              {% comment %} <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a> {% endcomment %}
+              <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                {# inline để form không chiếm cả dòng #}
+                {% csrf_token %} {# Rất quan trọng cho bảo mật POST #}
+                <button type="submit" class="link-button"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button> {# Dùng button type="submit" #}
+              </form>
+            </div>
+            <div class="username">@{{ user.username }}</div>
+          </div>
+        {% else %}
+          <div class="auth-buttons">
+            <a href="{% url 'login' %}" class="btn">Đăng nhập</a>
+            <a href="{% url 'register' %}" class="btn btn-outline">Đăng ký</a>
+          </div>
+        {% endif %}
+      </nav>
+
+      <div class="hero-content">
+        <h1 id="typewriter">Học Tập Thông Minh với AI</h1>
+        <p>Khám phá các công cụ học tập thông minh được hỗ trợ bởi AI, giúp bạn học tập hiệu quả và tiết kiệm thời gian.</p>
+        <a href="#features" class="cta-btn">Khám phá ngay</a>
+      </div>
+    </div>
+  </header>
+
+  <section id="features" class="features">
+    <div class="container">
+      <h2 class="section-title">Tính Năng Nổi Bật</h2>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <h3>Tóm tắt văn bản</h3>
+          <p>Tự động tóm tắt các tài liệu dài thành nội dung ngắn gọn, giúp bạn nắm bắt thông tin nhanh chóng.</p>
+          <a href="#" class="feature-link">Bắt đầu</a>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <h3>Giả lập hội thoại tiếng Anh</h3>
+          <p>Luyện tập giao tiếp tiếng Anh với AI, cải thiện kỹ năng nói và phản xạ ngôn ngữ.</p>
+          <a href="#" class="feature-link">Bắt đầu</a>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i class="fas fa-tasks"></i>
+          </div>
+          <h3>Tạo bài tập từ tài liệu</h3>
+          <p>Tự động tạo các bài tập và câu hỏi từ tài liệu học tập của bạn.</p>
+          <a href="#" class="feature-link">Bắt đầu</a>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">
+            <i class="fas fa-lightbulb"></i>
+          </div>
+          <h3>Trợ lý giải bài tập</h3>
+          <p>Nhận hướng dẫn và giải thích chi tiết cho các bài tập khó.</p>
+          <a href="#" class="feature-link">Bắt đầu</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="about">
+    <div class="container">
+      <h2 class="section-title">Về Chúng Tôi</h2>
+      <div class="about-content">
+        <div class="about-text">
+          <p>Chúng tôi cung cấp các giải pháp học tập thông minh được hỗ trợ bởi AI, giúp người học tiếp cận kiến thức một cách hiệu quả và thú vị.</p>
+          <p>Với công nghệ tiên tiến và giao diện thân thiện, chúng tôi mong muốn mang lại trải nghiệm học tập tốt nhất cho người dùng.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="container">
+      <h2 class="section-title">Liên Hệ</h2>
+      <div class="contact-content">
+        <p>Bạn có câu hỏi hoặc góp ý? Hãy liên hệ với chúng tôi!</p>
+        <div class="contact-links">
+          <a href="#" class="contact-link"><i class="fab fa-facebook"></i></a>
+          <a href="#" class="contact-link"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="contact-link"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="contact-link"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>© 2024 AILearning | Học tập thông minh với AI</p>
+      <ul class="footer-links">
+        <li>
+          <a href="#">Chính sách bảo mật</a>
+        </li>
+        <li>
+          <a href="#">Điều khoản sử dụng</a>
+        </li>
+      </ul>
+    </div>
+  </footer>
+{% endblock %}

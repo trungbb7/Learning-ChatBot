@@ -20,7 +20,11 @@ def generate_response(user_message):
     return response.text
 
 
+
 def index(request):
+    return render(request, "home.html")
+
+def chatbot(request):
     return render(request, "demo/demo.html")
 
 
@@ -32,3 +36,7 @@ def chat(request):
         response = generate_response(user_message)
         return JsonResponse({"response": response})
     return render(request, "demo/demo.html")
+
+
+def demo(request):
+    return render(request, "demo.html")
