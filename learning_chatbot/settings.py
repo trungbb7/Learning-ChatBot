@@ -41,6 +41,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 INSTALLED_APPS = [
     "demo",
+    "auths",
     "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
