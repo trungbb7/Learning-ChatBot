@@ -1,3 +1,45 @@
+// Theme handling
+function toggleTheme() {
+  const body = document.body;
+  const isDark = body.getAttribute("data-theme") === "dark";
+  const newTheme = isDark ? "light" : "dark";
+
+  // Apply transition class for smooth transition
+  body.classList.add("theme-transition");
+
+  // Update theme
+  body.setAttribute("data-theme", newTheme);
+  localStorage.setItem("theme", newTheme);
+
+  // Update icon
+  updateThemeIcon();
+
+  // Remove transition class after transition completes
+  setTimeout(() => {
+    body.classList.remove("theme-transition");
+  }, 500);
+
+  console.log(`Theme changed to: ${newTheme}`);
+}
+
+function updateThemeIcon() {
+  const icon = document.querySelector(".theme-toggle i");
+  if (icon) {
+    const isDark = document.body.getAttribute("data-theme") === "dark";
+    icon.className = isDark ? "fas fa-sun" : "fas fa-moon";
+  } else {
+    console.warn("Theme toggle icon not found");
+  }
+}
+
+// Initialize theme
+function initTheme() {
+  const savedTheme = localStorage.getItem("theme") || "light";
+  document.body.setAttribute("data-theme", savedTheme);
+  console.log(`Initialized theme: ${savedTheme}`);
+  updateThemeIcon();
+}
+
 // Typewriter effect
 class Typewriter {
   constructor(element, words, wait = 3000) {
@@ -41,27 +83,43 @@ class Typewriter {
   }
 }
 
-// Initialize typewriter effect
+// Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
-  // Profile dropdown
-  const profileBtn = document.querySelector(".profile-icon-btn");
-  const dropdownContent = document.querySelector(".dropdown-content");
+  console.log("DOM loaded, initializing application...");
 
-  if (profileBtn && dropdownContent) {
-    // Toggle dropdown on click
-    profileBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      dropdownContent.classList.toggle("active");
+  // Initialize theme
+  initTheme();
+
+  // Mobile menu toggle
+  const mobileMenuBtn = document.querySelector(".mobile-menu-btn");
+  const navLinks = document.querySelector(".nav-links");
+
+  if (mobileMenuBtn && navLinks) {
+    mobileMenuBtn.addEventListener("click", () => {
+      navLinks.classList.toggle("active");
+
+      // Toggle between menu and close icon
+      const icon = mobileMenuBtn.querySelector("i");
+      if (icon) {
+        if (navLinks.classList.contains("active")) {
+          icon.className = "fas fa-times";
+        } else {
+          icon.className = "fas fa-bars";
+        }
+      }
     });
 
-    // Close dropdown when clicking outside
-    document.addEventListener("click", () => {
-      dropdownContent.classList.remove("active");
-    });
-
-    // Prevent dropdown from closing when clicking inside
-    dropdownContent.addEventListener("click", (e) => {
-      e.stopPropagation();
+    // Close mobile menu when a link is clicked
+    navLinks.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        if (window.innerWidth <= 992) {
+          navLinks.classList.remove("active");
+          const icon = mobileMenuBtn.querySelector("i");
+          if (icon) {
+            icon.className = "fas fa-bars";
+          }
+        }
+      });
     });
   }
 
@@ -76,107 +134,129 @@ document.addEventListener("DOMContentLoaded", () => {
     const wait = 3000;
     new Typewriter(txtElement, words, wait);
   }
-});
 
-// Smooth scrolling for navigation links
-document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-  anchor.addEventListener("click", function (e) {
-    e.preventDefault();
-    document.querySelector(this.getAttribute("href")).scrollIntoView({
-      behavior: "smooth",
-    });
-  });
-});
-
-// Navbar scroll effect
-const navbar = document.querySelector(".navbar");
-let lastScroll = 0;
-
-window.addEventListener("scroll", () => {
-  const currentScroll = window.pageYOffset;
-
-  if (currentScroll <= 0) {
-    navbar.classList.remove("scroll-up");
-    return;
-  }
-
-  if (currentScroll > lastScroll && !navbar.classList.contains("scroll-down")) {
-    navbar.classList.remove("scroll-up");
-    navbar.classList.add("scroll-down");
-  } else if (
-    currentScroll < lastScroll &&
-    navbar.classList.contains("scroll-down")
-  ) {
-    navbar.classList.remove("scroll-down");
-    navbar.classList.add("scroll-up");
-  }
-  lastScroll = currentScroll;
-});
-
-// Feature items animation on scroll
-const featureItems = document.querySelectorAll(".feature-item");
-
-const observer = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("animate");
+  // Smooth scrolling for navigation links
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener("click", function (e) {
+      e.preventDefault();
+      const targetElement = document.querySelector(this.getAttribute("href"));
+      if (targetElement) {
+        targetElement.scrollIntoView({
+          behavior: "smooth",
+        });
       }
     });
-  },
-  {
-    threshold: 0.1,
+  });
+
+  // Feature items animation on scroll
+  const featureItems = document.querySelectorAll(".feature-item");
+
+  if (featureItems.length > 0) {
+    // Add animation class for CSS transitions
+    featureItems.forEach((item) => {
+      item.classList.add("feature-animate");
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("animate");
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+      }
+    );
+
+    featureItems.forEach((item) => {
+      observer.observe(item);
+    });
   }
-);
 
-featureItems.forEach((item) => {
-  observer.observe(item);
-});
-
-// Mobile menu toggle
-const menuToggle = document.querySelector(".menu-toggle");
-const navLinks = document.querySelector(".nav-links");
-
-if (menuToggle && navLinks) {
-  menuToggle.addEventListener("click", () => {
-    navLinks.classList.toggle("active");
-    menuToggle.classList.toggle("active");
-  });
-}
-
-// Parallax effect for hero section
-window.addEventListener("scroll", () => {
+  // Parallax effect for hero section
   const hero = document.querySelector(".hero");
-  const scrolled = window.pageYOffset;
-  hero.style.backgroundPositionY = -(scrolled * 0.5) + "px";
+  if (hero) {
+    window.addEventListener("scroll", () => {
+      const scrolled = window.pageYOffset;
+      hero.style.backgroundPositionY = -(scrolled * 0.3) + "px";
+    });
+  }
+
+  // Navbar scroll effect
+  const mainNav = document.querySelector(".main-nav");
+  if (mainNav) {
+    let lastScroll = 0;
+
+    window.addEventListener("scroll", () => {
+      const currentScroll = window.pageYOffset;
+
+      if (currentScroll <= 50) {
+        mainNav.classList.remove("scrolled");
+        return;
+      }
+
+      mainNav.classList.add("scrolled");
+
+      if (
+        currentScroll > lastScroll &&
+        !mainNav.classList.contains("scroll-down")
+      ) {
+        // Scrolling down
+        mainNav.classList.remove("scroll-up");
+        mainNav.classList.add("scroll-down");
+      } else if (
+        currentScroll < lastScroll &&
+        mainNav.classList.contains("scroll-down")
+      ) {
+        // Scrolling up
+        mainNav.classList.remove("scroll-down");
+        mainNav.classList.add("scroll-up");
+      }
+
+      lastScroll = currentScroll;
+    });
+  }
+
+  // Form validation for contact form
+  const contactForm = document.querySelector(".contact-form");
+  if (contactForm) {
+    contactForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = contactForm.querySelector('input[name="name"]');
+      const email = contactForm.querySelector('input[name="email"]');
+      const message = contactForm.querySelector('textarea[name="message"]');
+
+      if (!name || !email || !message) {
+        console.warn("Form elements not found");
+        return;
+      }
+
+      if (!name.value || !email.value || !message.value) {
+        alert("Vui lòng điền đầy đủ thông tin");
+        return;
+      }
+
+      if (!isValidEmail(email.value)) {
+        alert("Vui lòng nhập email hợp lệ");
+        return;
+      }
+
+      // Here you would typically send the form data to your server
+      alert(
+        "Cảm ơn bạn đã gửi tin nhắn! Chúng tôi sẽ phản hồi sớm nhất có thể."
+      );
+      contactForm.reset();
+    });
+  }
+
+  // Debug info
+  console.log("Application initialized successfully");
 });
 
-// Form validation
-const contactForm = document.querySelector(".contact-form");
-if (contactForm) {
-  contactForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const name = contactForm.querySelector('input[name="name"]').value;
-    const email = contactForm.querySelector('input[name="email"]').value;
-    const message = contactForm.querySelector('textarea[name="message"]').value;
-
-    if (!name || !email || !message) {
-      alert("Please fill in all fields");
-      return;
-    }
-
-    if (!isValidEmail(email)) {
-      alert("Please enter a valid email address");
-      return;
-    }
-
-    // Here you would typically send the form data to your server
-    alert("Thank you for your message! We will get back to you soon.");
-    contactForm.reset();
-  });
-}
-
+// Helper function for email validation
 function isValidEmail(email) {
   const re =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

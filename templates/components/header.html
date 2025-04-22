@@ -1,0 +1,37 @@
+<nav class="main-nav" id="navbar">
+  <div class="nav-container">
+    <a href="{% url 'home' %}" class="nav-logo">Learning<span>Chatbot</span></a>
+
+    <div class="mobile-menu-btn">
+      <i class="fas fa-bars"></i>
+    </div>
+
+    <ul class="nav-links">
+      {% comment %} <li>
+        <a href="{% url 'home' %}" class="active"><i class="fas fa-home"></i> Trang chủ</a>
+      </li> {% endcomment %}
+
+      {% if user.is_authenticated %}
+        <li class="user-menu">
+          <a href="#" class="user-menu-btn"><i class="fas fa-user-circle"></i> {{ user.username }}</a>
+          <ul class="dropdown-menu">
+            <li>
+              <a href="#"><i class="fas fa-user"></i> Hồ sơ</a>
+            </li>
+            <li>
+              <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+              </form>
+            </li>
+          </ul>
+        </li>
+      {% else %}
+        <li class="auth-links">
+          <a href="{% url 'login' %}" class="login-btn"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
+          <a href="{% url 'register' %}" class="register-btn"><i class="fas fa-user-plus"></i> Đăng ký</a>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>
