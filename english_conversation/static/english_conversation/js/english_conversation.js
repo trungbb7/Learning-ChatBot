@@ -1,12 +1,8 @@
-const API_KEY = "";
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
-
 let currentScenario = null;
-let conversationHistory = [];
-let savedConversations = JSON.parse(
-  localStorage.getItem("conversations") || "[]"
-);
-let currentConversationId = null; // Track current conversation ID
+let bot_role = null;
+let scenarioDescription = null;
+
+let currentConversationId = null;
 
 // Theme handling
 function toggleTheme() {
@@ -57,39 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize theme
   initTheme();
 
-  // Mobile menu toggle
-  const mobileMenuBtn = document.querySelector(".mobile-menu-btn");
-  const navLinks = document.querySelector(".nav-links");
-
-  if (mobileMenuBtn && navLinks) {
-    mobileMenuBtn.addEventListener("click", () => {
-      navLinks.classList.toggle("active");
-
-      // Toggle between menu and close icon
-      const icon = mobileMenuBtn.querySelector("i");
-      if (icon) {
-        if (navLinks.classList.contains("active")) {
-          icon.className = "fas fa-times";
-        } else {
-          icon.className = "fas fa-bars";
-        }
-      }
-    });
-
-    // Close mobile menu when a link is clicked
-    navLinks.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
-        if (window.innerWidth <= 992) {
-          navLinks.classList.remove("active");
-          const icon = mobileMenuBtn.querySelector("i");
-          if (icon) {
-            icon.className = "fas fa-bars";
-          }
-        }
-      });
-    });
-  }
-
   // Set up scenario selection
   document.querySelectorAll(".scenario-card").forEach((card) => {
     card.addEventListener("click", () => {
@@ -98,6 +61,11 @@ document.addEventListener("DOMContentLoaded", () => {
         .forEach((c) => c.classList.remove("active"));
       card.classList.add("active");
       currentScenario = card.dataset.scenario;
+      bot_role = card.dataset.botRole;
+      if (currentScenario !== "custom") {
+        scenarioDescription = card.dataset.scenarioDescription;
+      } else {
+      }
 
       // Toggle custom scenario input container visibility
       const customScenarioContainer = document.getElementById(
@@ -110,8 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("custom-scenario-input").focus();
         } else {
           customScenarioContainer.classList.remove("active");
-          // Start pre-defined scenario conversation
-          startConversation();
         }
       }
     });
@@ -135,64 +101,41 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("Application initialized successfully");
 });
 
-// Conversation history handling
-function saveConversation(customDescription = null) {
-  if (conversationHistory.length === 0) return;
-
-  const conversationData = {
-    id: currentConversationId || Date.now(),
-    scenario: currentScenario,
-    messages: [...conversationHistory],
-    date: new Date().toLocaleString(),
-    preview: conversationHistory[0].content.substring(0, 50) + "...",
-    customDescription: customDescription,
-  };
-
-  // If this is a new conversation
-  if (!currentConversationId) {
-    currentConversationId = conversationData.id;
-    savedConversations.unshift(conversationData);
-  } else {
-    // Update existing conversation
-    const index = savedConversations.findIndex(
-      (conv) => conv.id === currentConversationId
-    );
-    if (index !== -1) {
-      savedConversations[index] = conversationData;
-    }
-  }
-
-  localStorage.setItem("conversations", JSON.stringify(savedConversations));
-  updateHistoryList();
-}
-
 // Update history list with delete buttons for each conversation
-function updateHistoryList() {
+async function updateHistoryList() {
   const historyList = document.getElementById("history-list");
   if (!historyList) return;
 
-  historyList.innerHTML = savedConversations
-    .map(
-      (conv) => `
+  try {
+    const response = await fetch("/api/conversation-history", {
+      method: "GET",
+    });
+
+    const data = await response.json();
+    const conversations = data.history;
+    historyList.innerHTML = conversations
+      .map(
+        (conv) => `
     <div class="history-item" data-id="${conv.id}">
       <div class="history-content" onclick="loadConversation(${conv.id})">
-        <div class="scenario">${getScenarioName(conv.scenario)}</div>
+        <div class="scenario">${conv.scenario}</div>
         <div class="preview">${conv.preview}</div>
         <div class="date">${conv.date}</div>
       </div>
-      <button class="delete-conversation-btn" onclick="deleteConversation(${
-        conv.id
-      }, event)">
+      <button class="delete-conversation-btn" onclick="deleteConversation(${conv.id}, event)">
         <i class="fas fa-times"></i>
       </button>
     </div>
   `
-    )
-    .join("");
+      )
+      .join("");
+  } catch (e) {
+    console.error(e.message);
+  }
 }
 
 // Function to delete a specific conversation
-function deleteConversation(id, event) {
+async function deleteConversation(id, event) {
   // Stop event propagation to prevent loading the conversation when deleting it
   if (event) {
     event.stopPropagation();
@@ -200,143 +143,108 @@ function deleteConversation(id, event) {
 
   // Ask for confirmation
   if (confirm("Bạn có chắc chắn muốn xóa cuộc hội thoại này?")) {
-    // Find the index of the conversation in the saved conversations array
-    const index = savedConversations.findIndex((conv) => conv.id === id);
+    try {
+      const response = await fetch(`/api/english-conversation/delete`, {
+        method: "POST",
+        body: JSON.stringify({
+          id: id,
+        }),
+      });
 
-    // If found, remove it from the array
-    if (index !== -1) {
-      savedConversations.splice(index, 1);
+      if (!response.ok) {
+        const data = await response.json();
+        console.log(data.message);
+      } else {
+        const data = await response.json();
+        console.log(data.message);
 
-      // If we deleted the current conversation, reset currentConversationId
-      if (currentConversationId === id) {
-        currentConversationId = null;
-        conversationHistory = [];
+        // If we deleted the current conversation, reset currentConversationId
+        if (currentConversationId === id) {
+          currentConversationId = null;
 
-        // Clear the chat messages
-        const chatMessages = document.getElementById("chat-messages");
-        if (chatMessages) {
-          chatMessages.innerHTML = "";
+          // Clear the chat messages
+          const chatMessages = document.getElementById("chat-messages");
+          if (chatMessages) {
+            chatMessages.innerHTML = "";
+          }
         }
+
+        // Update the UI
+        updateHistoryList();
       }
-
-      // Update localStorage
-      localStorage.setItem("conversations", JSON.stringify(savedConversations));
-
-      // Update the UI
-      updateHistoryList();
-
-      console.log(`Conversation ${id} deleted successfully`);
+    } catch (e) {
+      console.error(e.message);
     }
+
+    console.log(`Conversation ${id} deleted successfully`);
+    // }
   }
 }
 
-function getScenarioName(scenario) {
-  if (scenario && scenario.startsWith("custom_")) {
-    // Find the conversation to get its custom description
-    const conversation = savedConversations.find(
-      (conv) => conv.scenario === scenario
-    );
-    if (conversation && conversation.customDescription) {
-      // Return a shortened version of the custom description
-      const desc = conversation.customDescription;
-      return (
-        "Tùy chỉnh: " +
-        (desc.length > 30 ? desc.substring(0, 30) + "..." : desc)
+async function loadConversation(id) {
+  try {
+    const response = await fetch(`/api/get-conversation/${id}`);
+
+    const conversation = await response.json();
+    console.log("conversation: ", conversation);
+    if (!conversation) return;
+
+    // Update UI
+    document.querySelectorAll(".scenario-card").forEach((card) => {
+      card.classList.toggle(
+        "active",
+        card.dataset.scenario === conversation.scenario
       );
-    }
-    return "Tình huống tùy chỉnh";
-  }
+    });
 
-  const names = {
-    restaurant: "Đặt Đồ Ăn",
-    directions: "Hỏi Đường",
-    interview: "Phỏng Vấn",
-    meeting: "Gặp Gỡ",
-    custom: "Tùy Chỉnh",
-  };
-  return names[scenario] || scenario;
-}
-
-function loadConversation(id) {
-  const conversation = savedConversations.find(
-    (conv) => conv.id === parseInt(id)
-  );
-  if (!conversation) return;
-
-  // Update UI
-  document.querySelectorAll(".scenario-card").forEach((card) => {
-    card.classList.toggle(
-      "active",
-      card.dataset.scenario === conversation.scenario
-    );
-  });
-
-  // Clear current conversation
-  const chatMessages = document.getElementById("chat-messages");
-  if (chatMessages) {
-    chatMessages.innerHTML = "";
-  }
-
-  // Load conversation
-  currentScenario = conversation.scenario;
-  currentConversationId = conversation.id; // Set current conversation ID
-  conversationHistory = [...conversation.messages];
-
-  // Display messages
-  conversationHistory.forEach((msg) => {
-    addMessage(msg.content, msg.role === "assistant" ? "bot" : "user");
-  });
-
-  // Update active state in history
-  document.querySelectorAll(".history-item").forEach((item) => {
-    item.classList.toggle("active", item.dataset.id === id.toString());
-  });
-}
-
-function clearHistory() {
-  if (confirm("Bạn có chắc chắn muốn xóa tất cả lịch sử hội thoại?")) {
-    savedConversations = [];
-    currentConversationId = null; // Reset current conversation ID
-    localStorage.removeItem("conversations");
-    updateHistoryList();
-
-    // Clear the current conversation display
-    conversationHistory = [];
+    // Clear current conversation
     const chatMessages = document.getElementById("chat-messages");
     if (chatMessages) {
       chatMessages.innerHTML = "";
     }
 
-    console.log("All conversation history cleared");
+    // Load conversation
+    currentScenario = conversation.scenario;
+    currentConversationId = conversation.id; // Set current conversation ID
+    // conversationHistory = [...conversation.messages];
+
+    // Display messages
+    conversation.messages.forEach((msg) => {
+      addMessage(msg.content, msg.role, msg.feedback);
+    });
+
+    // Update active state in history
+    document.querySelectorAll(".history-item").forEach((item) => {
+      item.classList.toggle("active", item.dataset.id === id.toString());
+    });
+  } catch (e) {
+    console.error(e);
   }
 }
 
-// Update startConversation
-async function startConversation() {
-  const chatMessages = document.getElementById("chat-messages");
-  if (!chatMessages) {
-    console.error("Chat messages container not found");
-    return;
-  }
+async function clearHistory() {
+  if (confirm("Bạn có chắc chắn muốn xóa tất cả lịch sử hội thoại?")) {
+    try {
+      const response = await fetch("/api/english-conversation/delete-all", {
+        method: "POST",
+      });
+      if (!response.ok) {
+        console.log("Remove unsuccessful");
+      } else {
+        currentConversationId = null; // Reset current conversation ID
+        updateHistoryList();
 
-  chatMessages.innerHTML = "";
-  conversationHistory = [];
-  currentConversationId = null; // Reset conversation ID for new conversation
+        // Clear the current conversation display
+        const chatMessages = document.getElementById("chat-messages");
+        if (chatMessages) {
+          chatMessages.innerHTML = "";
+        }
 
-  const scenarioPrompts = {
-    restaurant: "Hello! Welcome to our restaurant. How can I help you today?",
-    directions:
-      "Hi! I notice you look a bit lost. Can I help you find your way?",
-    interview:
-      "Hello! I'm the hiring manager. Could you tell me about yourself?",
-    meeting: "Hi! I'm Sarah. It's nice to meet you!",
-  };
-
-  const initialMessage = scenarioPrompts[currentScenario];
-  if (initialMessage) {
-    addMessage(initialMessage, "bot");
-    conversationHistory.push({ role: "assistant", content: initialMessage });
-    saveConversation(); // Save initial message
+        console.log("All conversation history cleared");
+      }
+    } catch (e) {
+      console.error(e.message);
+    }
   }
 }
 
@@ -358,36 +266,15 @@ async function sendMessage() {
 
   // Add user message
   addMessage(text, "user");
-  conversationHistory.push({ role: "user", content: text });
   userInput.value = "";
 
   try {
-    const response = await fetch(API_URL, {
+    const response = await fetch("api/english-conversation/continue", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: `You are an English conversation partner. The current scenario is: ${currentScenario}. 
-                The user's message is: "${text}". 
-                
-                Please provide:
-                1. A natural response to the user's message
-                2. Feedback on their English (grammar, vocabulary, naturalness)
-                3. Suggestions for improvement if needed
-                
-                Format your response as JSON:
-                {
-                    "response": "your response here",
-                    "feedback": "your feedback here"
-                }`,
-              },
-            ],
-          },
-        ],
+        conversation_id: currentConversationId,
+        user_message: text,
       }),
     });
 
@@ -398,41 +285,24 @@ async function sendMessage() {
     const data = await response.json();
     console.log("API Response:", data);
 
-    if (
-      !data.candidates ||
-      !data.candidates[0] ||
-      !data.candidates[0].content ||
-      !data.candidates[0].content.parts
-    ) {
-      throw new Error("Invalid API response format");
+    const responseText = data.message;
+    const feedback = data.feedback;
+
+    if (responseText) {
+      addMessage(responseText, "bot");
     }
 
-    const responseText = data.candidates[0].content.parts[0].text;
-    console.log("Response text:", responseText);
+    // Update the feedback for the user's message in conversationHistory
+    if (feedback) {
+      // Update the feedback for the user's message in conversationHistory
+      showFeedback(feedback);
 
-    // Try to parse the response text as JSON
-    let result;
-    try {
-      result = JSON.parse(responseText);
-    } catch (e) {
-      // If parsing fails, try to extract JSON from the text
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error("No valid JSON found in response");
+      // Update the message element with feedback
+      const messages = document.querySelectorAll(".message.user");
+      const lastUserMessageElement = messages[messages.length - 1];
+      if (lastUserMessageElement) {
+        lastUserMessageElement.setAttribute("data-feedback", feedback);
       }
-      result = JSON.parse(jsonMatch[0]);
-    }
-
-    console.log("Parsed result:", result);
-
-    // Display the response message
-    if (result.response) {
-      addMessage(result.response, "bot");
-      conversationHistory.push({ role: "assistant", content: result.response });
-      saveConversation(); // Save after each complete exchange
-    }
-    if (result.feedback) {
-      showFeedback(result.feedback);
     }
   } catch (error) {
     console.error("Error:", error);
@@ -456,7 +326,7 @@ function showFeedback(feedback) {
   feedbackDiv.className = "feedback grammar";
 }
 
-function addMessage(text, sender) {
+function addMessage(text, sender, feedback = null) {
   const chatMessages = document.getElementById("chat-messages");
   if (!chatMessages) {
     console.error("Chat messages container not found");
@@ -466,6 +336,12 @@ function addMessage(text, sender) {
   const messageDiv = document.createElement("div");
   messageDiv.className = `message ${sender}`;
   messageDiv.textContent = text;
+
+  // Add feedback data attribute if available
+  if (feedback) {
+    messageDiv.setAttribute("data-feedback", feedback);
+  }
+
   chatMessages.appendChild(messageDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -476,35 +352,39 @@ function addMessage(text, sender) {
 // Custom scenario handling
 function startCustomScenario() {
   const customScenarioInput = document.getElementById("custom-scenario-input");
-  if (!customScenarioInput) return;
+  const customRoleInput = document.getElementById("custom-role-input");
+  if (!customScenarioInput || !customRoleInput) return;
 
-  const scenarioDescription = customScenarioInput.value.trim();
-  if (!scenarioDescription) {
+  const scenarioDescriptionData = customScenarioInput.value.trim();
+  const roleDescriptionData = customRoleInput.value.trim();
+
+  if (!scenarioDescriptionData) {
     alert("Vui lòng nhập mô tả tình huống trước khi bắt đầu.");
     customScenarioInput.focus();
     return;
   }
 
-  // Clear chat messages
-  const chatMessages = document.getElementById("chat-messages");
-  if (chatMessages) {
-    chatMessages.innerHTML = "";
+  if (!roleDescriptionData) {
+    alert("Vui lòng nhập vai trò của người đối thoại trước khi bắt đầu.");
+    customRoleInput.focus();
+    return;
   }
 
-  // Reset conversation history
-  conversationHistory = [];
-  currentConversationId = null;
+  scenarioDescription = scenarioDescriptionData;
+  bot_role = roleDescriptionData;
 
-  // Start custom conversation
-  startCustomConversation(scenarioDescription);
+  startConversation();
 }
 
-async function startCustomConversation(scenarioDescription) {
+async function startConversation() {
   const chatMessages = document.getElementById("chat-messages");
   if (!chatMessages) {
     console.error("Chat messages container not found");
     return;
   }
+
+  // Clear the chat messages
+  chatMessages.innerHTML = "";
 
   // Show loading indicator
   const loadingMessage = document.createElement("div");
@@ -514,29 +394,12 @@ async function startCustomConversation(scenarioDescription) {
 
   try {
     // Generate initial message based on custom scenario
-    const response = await fetch(API_URL, {
+    const response = await fetch("/api/english-conversation/get-init-message", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: `You are an English conversation partner. The user wants to practice English conversation in this context: "${scenarioDescription}".
-                
-                Please provide:
-                1. A natural opening message to start the conversation in this context
-                2. Keep it brief and natural, as if you're a real person in this situation
-                
-                Format your response as JSON:
-                {
-                    "response": "your opening message here"
-                }`,
-              },
-            ],
-          },
-        ],
+        scenario: currentScenario,
+        description: scenarioDescription,
+        bot_role: bot_role,
       }),
     });
 
@@ -544,43 +407,21 @@ async function startCustomConversation(scenarioDescription) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
+    updateHistoryList();
+
     const data = await response.json();
 
-    // Remove loading message
-    chatMessages.removeChild(loadingMessage);
-
-    if (
-      !data.candidates ||
-      !data.candidates[0] ||
-      !data.candidates[0].content ||
-      !data.candidates[0].content.parts
-    ) {
-      throw new Error("Invalid API response format");
-    }
-
-    const responseText = data.candidates[0].content.parts[0].text;
-
-    // Try to parse the response text as JSON
-    let result;
-    try {
-      result = JSON.parse(responseText);
-    } catch (e) {
-      // If parsing fails, try to extract JSON from the text
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error("No valid JSON found in response");
-      }
-      result = JSON.parse(jsonMatch[0]);
-    }
+    const initialMessage = data.message;
+    const conversationId = data.conversation_id;
 
     // Display the initial message
-    if (result.response) {
-      addMessage(result.response, "bot");
-      conversationHistory.push({ role: "assistant", content: result.response });
+    if (initialMessage && conversationId) {
+      addMessage(initialMessage, "bot");
+      currentConversationId = conversationId;
 
-      // Save with custom scenario
-      currentScenario = "custom_" + Date.now();
-      saveConversation(scenarioDescription);
+      if (loadingMessage.parentNode) {
+        chatMessages.removeChild(loadingMessage);
+      }
     }
   } catch (error) {
     // Remove loading message if still present

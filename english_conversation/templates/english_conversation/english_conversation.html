@@ -47,7 +47,7 @@
       <div class="scenario-container">
         <h2 class="section-title">Chọn Tình Huống</h2>
         <div class="scenario-selector">
-          <div class="scenario-card" data-scenario="restaurant">
+          <div class="scenario-card" data-scenario="Đặt đồ ăn" data-scenario-description="Đặt đồ ăn" data-bot-role="Nhân viên phục vụ">
             <div class="scenario-icon">
               <i class="fas fa-utensils"></i>
             </div>
@@ -56,7 +56,7 @@
               <p>Luyện tập đặt đồ ăn tại nhà hàng</p>
             </div>
           </div>
-          <div class="scenario-card" data-scenario="directions">
+          <div class="scenario-card" data-scenario="Hỏi đường" data-scenario-description="Hỏi đường" data-bot-role="Người đi đường">
             <div class="scenario-icon">
               <i class="fas fa-directions"></i>
             </div>
@@ -65,7 +65,7 @@
               <p>Học cách hỏi và chỉ đường</p>
             </div>
           </div>
-          <div class="scenario-card" data-scenario="interview">
+          <div class="scenario-card" data-scenario="Phỏng vấn" data-scenario-description="Phỏng vấn" data-bot-role="Nhà tuyển dụng">
             <div class="scenario-icon">
               <i class="fas fa-briefcase"></i>
             </div>
@@ -74,7 +74,7 @@
               <p>Luyện tập các câu hỏi phỏng vấn thông dụng</p>
             </div>
           </div>
-          <div class="scenario-card" data-scenario="meeting">
+          <div class="scenario-card" data-scenario="Gặp gỡ" data-scenario-description="Cuộc gặp gỡ làm quen" data-bot-role="Người lạ lần đầu gặp">
             <div class="scenario-icon">
               <i class="fas fa-users"></i>
             </div>
@@ -94,11 +94,20 @@
           </div>
         </div>
 
+        <!-- Start Button -->
+        <div class="start-button-container">
+          <button id="start-conversation-btn" class="start-btn" onclick="startConversation()"><i class="fas fa-play"></i> Bắt đầu hội thoại</button>
+        </div>
+
         <!-- Custom Scenario Input -->
         <div id="custom-scenario-container" class="custom-scenario-container">
           <div class="form-group">
             <label for="custom-scenario-input">Mô tả tình huống của bạn:</label>
             <textarea id="custom-scenario-input" placeholder="Ví dụ: Cuộc phỏng vấn xin học bổng du học, Đặt phòng khách sạn, Hỏi thông tin về chuyến bay..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="custom-role-input">Vai trò của người đối thoại:</label>
+            <input type="text" id="custom-role-input" placeholder="Ví dụ: Giám đốc nhân sự, Nhân viên lễ tân, Hướng dẫn viên du lịch..." />
           </div>
           <button id="start-custom-scenario" class="start-custom-btn" onclick="startCustomScenario()"><i class="fas fa-play"></i> Bắt đầu hội thoại</button>
         </div>
