@@ -20,5 +20,3 @@ def register(request):
             
             
             
-def login_demo(request):
-    return render(request, 'auths/login_demo.html')

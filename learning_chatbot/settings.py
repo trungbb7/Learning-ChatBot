@@ -47,6 +47,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 INSTALLED_APPS = [
     "demo",
     "auths",
+    "english_conversation",
     "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -149,6 +150,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 LOGIN_REDIRECT_URL = '/'
+
+LOGOUT_REDIRECT_URL = '/'
 
 
 

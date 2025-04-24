@@ -1,0 +1,164 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+/* Body & Global Styling */
+body {
+  font-family: "Arial", sans-serif;
+  color: #fff;
+  background: #0f2027;
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Hero Section */
+.hero {
+  height: 100vh;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url("https://source.unsplash.com/1600x900/?technology") no-repeat center
+      center/cover;
+  position: relative;
+}
+
+.hero-overlay {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 50px;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  color: #f9a825;
+}
+
+.logo span {
+  color: #29b6f6;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+}
+
+.nav-links li {
+  margin: 0 20px;
+}
+
+.nav-links a:hover {
+  color: #f9a825;
+}
+
+.btn {
+  padding: 10px 20px;
+  background: #f9a825;
+  color: #0f2027;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.btn:hover {
+  background: #29b6f6;
+}
+
+/* Hero Content */
+.hero-content {
+  text-align: center;
+  margin-top: -50px;
+}
+
+.hero-content h1 {
+  font-size: 60px;
+  line-height: 1.2;
+}
+
+.hero-content h1 span {
+  color: #29b6f6;
+}
+
+.hero-content p {
+  font-size: 20px;
+  margin: 20px 0 40px;
+}
+
+.cta-btn {
+  padding: 15px 40px;
+  background: #f9a825;
+  color: #0f2027;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: bold;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.cta-btn:hover {
+  transform: scale(1.1);
+  background: #29b6f6;
+}
+
+/* Features Section */
+.features {
+  padding: 50px 20px;
+  display: flex;
+  justify-content: space-around;
+  background: #29b6f6;
+  text-align: center;
+}
+
+.feature-item {
+  flex: 1;
+  margin: 0 20px;
+  padding: 20px;
+  background: #f9a825;
+  border-radius: 10px;
+  color: #0f2027;
+  transition: transform 0.3s ease;
+}
+
+.feature-item:hover {
+  transform: translateY(-10px);
+}
+
+.feature-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+/* Footer */
+.footer {
+  padding: 20px;
+  background: #0f2027;
+  text-align: center;
+}
+
+.footer ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.footer ul li {
+  margin: 0 10px;
+}
+
+.footer ul li a:hover {
+  color: #f9a825;
+}
