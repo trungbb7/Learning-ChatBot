@@ -447,7 +447,7 @@ async function startConversation() {
     return;
   }
 
-  if (!currentScenario || scenarioDescription) {
+  if (!currentScenario || !scenarioDescription) {
     alert("Vui lòng chọn chủ đề");
     return;
   }
