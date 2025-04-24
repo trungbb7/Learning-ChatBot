@@ -219,6 +219,10 @@ async function loadConversation(id) {
       chatMessages.innerHTML = "";
     }
 
+    // hide feedback
+    const feedbackDiv = document.getElementById("feedback");
+    feedbackDiv.style.display = "none";
+
     // Load conversation
     currentScenario = conversation.scenario;
     currentConversationId = conversation.id; // Set current conversation ID
@@ -452,9 +456,8 @@ async function startConversation() {
     return;
   }
 
-  const feedbackDiv = document.getElementById("feedback");
-
   // hide feedback
+  const feedbackDiv = document.getElementById("feedback");
   feedbackDiv.style.display = "none";
 
   // Clear the chat messages
