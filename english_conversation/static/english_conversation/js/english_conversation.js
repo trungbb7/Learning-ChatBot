@@ -447,6 +447,11 @@ async function startConversation() {
     return;
   }
 
+  if (!currentScenario || scenarioDescription) {
+    alert("Vui lòng chọn chủ đề");
+    return;
+  }
+
   const feedbackDiv = document.getElementById("feedback");
 
   // hide feedback
