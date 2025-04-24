@@ -183,6 +183,20 @@ async function deleteConversation(id, event) {
   }
 }
 
+function scrollIntoInput() {
+  setTimeout(() => {
+    const conversationArea = document.querySelector(".conversation-area");
+    const chatMessagesArea = document.getElementById("chat-messages");
+
+    chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+
+    conversationArea.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, 100);
+}
+
 async function loadConversation(id) {
   try {
     const response = await fetch(`/api/get-conversation/${id}`);
@@ -219,6 +233,8 @@ async function loadConversation(id) {
     document.querySelectorAll(".history-item").forEach((item) => {
       item.classList.toggle("active", item.dataset.id === id.toString());
     });
+
+    scrollIntoInput();
   } catch (e) {
     console.error(e);
   }
@@ -250,7 +266,41 @@ async function clearHistory() {
   }
 }
 
-// Update sendMessage
+// Add loading indicator function
+function showLoadingIndicator() {
+  const chatMessages = document.getElementById("chat-messages");
+  if (!chatMessages) return;
+
+  // Create loading indicator element
+  const loadingDiv = document.createElement("div");
+  loadingDiv.className = "message bot loading-indicator";
+  loadingDiv.id = "typing-indicator";
+
+  // Create typing animation dots
+  const dotsContainer = document.createElement("div");
+  dotsContainer.className = "typing-dots";
+
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    dotsContainer.appendChild(dot);
+  }
+
+  loadingDiv.appendChild(dotsContainer);
+  chatMessages.appendChild(loadingDiv);
+
+  // Scroll to show loading indicator
+  scrollIntoInput();
+}
+
+function removeLoadingIndicator() {
+  const loadingIndicator = document.getElementById("typing-indicator");
+  if (loadingIndicator && loadingIndicator.parentNode) {
+    loadingIndicator.parentNode.removeChild(loadingIndicator);
+  }
+}
+
+// Update sendMessage function
 async function sendMessage() {
   const userInput = document.getElementById("user-input");
   if (!userInput) {
@@ -270,6 +320,9 @@ async function sendMessage() {
   addMessage(text, "user");
   userInput.value = "";
 
+  // Show loading indicator
+  showLoadingIndicator();
+
   try {
     const response = await fetch("api/english-conversation/continue", {
       method: "POST",
@@ -286,6 +339,9 @@ async function sendMessage() {
 
     const data = await response.json();
     console.log("API Response:", data);
+
+    // Remove loading indicator before adding the response
+    removeLoadingIndicator();
 
     const responseText = data.message;
     const feedback = data.feedback;
@@ -307,6 +363,9 @@ async function sendMessage() {
       }
     }
   } catch (error) {
+    // Remove loading indicator on error
+    removeLoadingIndicator();
+
     console.error("Error:", error);
     addMessage("I'm sorry, I encountered an error. Please try again.", "bot");
   } finally {
@@ -326,6 +385,8 @@ function showFeedback(feedback) {
   feedbackDiv.textContent = feedback;
   feedbackDiv.style.display = "block";
   feedbackDiv.className = "feedback grammar";
+
+  scrollIntoInput();
 }
 
 function addMessage(text, sender, feedback = null) {
@@ -345,7 +406,8 @@ function addMessage(text, sender, feedback = null) {
   }
 
   chatMessages.appendChild(messageDiv);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  scrollIntoInput();
 
   // Log the message for debugging
   console.log(`Added ${sender} message:`, text);
@@ -385,14 +447,16 @@ async function startConversation() {
     return;
   }
 
+  const feedbackDiv = document.getElementById("feedback");
+
+  // hide feedback
+  feedbackDiv.style.display = "none";
+
   // Clear the chat messages
   chatMessages.innerHTML = "";
 
   // Show loading indicator
-  const loadingMessage = document.createElement("div");
-  loadingMessage.className = "message bot loading";
-  loadingMessage.textContent = "AI đang chuẩn bị cuộc hội thoại...";
-  chatMessages.appendChild(loadingMessage);
+  showLoadingIndicator();
 
   try {
     // Generate initial message based on custom scenario
@@ -416,20 +480,17 @@ async function startConversation() {
     const initialMessage = data.message;
     const conversationId = data.conversation_id;
 
+    // Remove loading indicator
+    removeLoadingIndicator();
+
     // Display the initial message
     if (initialMessage && conversationId) {
       addMessage(initialMessage, "bot");
       currentConversationId = conversationId;
-
-      if (loadingMessage.parentNode) {
-        chatMessages.removeChild(loadingMessage);
-      }
     }
   } catch (error) {
-    // Remove loading message if still present
-    if (loadingMessage.parentNode) {
-      chatMessages.removeChild(loadingMessage);
-    }
+    // Remove loading indicator if still present
+    removeLoadingIndicator();
 
     console.error("Error:", error);
     addMessage(
