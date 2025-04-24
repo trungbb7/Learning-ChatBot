@@ -9,6 +9,7 @@ import json
 # Create your views here.
 
 
+@login_required
 def english_conversation(request):
     return render(request, 'english_conversation/english_conversation.html')
 
