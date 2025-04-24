@@ -16,6 +16,7 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 class InitialMessage(BaseModel):
     message: str
+    title: str
 
 
 class RepsonseMessage(BaseModel):
@@ -24,7 +25,7 @@ class RepsonseMessage(BaseModel):
 
 
 
-def get_initial_message(scenario, description = None, bot_role = None):
+def get_initial_content(scenario, description = None, bot_role = None):
     prompt = f"""
     Tôi muốn luyện tập hội thoại giao tiếp tiếng Anh trong ngữ cảnh: "{description}".
     Bạn sẽ đóng vai là: "{bot_role}"
@@ -32,6 +33,7 @@ def get_initial_message(scenario, description = None, bot_role = None):
     Hãy:
     1. Phản hồi lời mở đầu tự nhiên như 2 người trong thực tế để bắt đầu cuộc hội thoại.
     3. Tự tạo thông tin cá nhân, ngữ cảnh cần thiết.
+    3. Tạo tiêu đề ngắn gọn cho cuộc hội thoại (tối đa 255 ký tự)
     3. Sử dụng tiếng Anh.  
     """
     
@@ -43,7 +45,7 @@ def get_initial_message(scenario, description = None, bot_role = None):
         response_schema=InitialMessage,
     ))
     
-    return json.loads(response.text)['message']
+    return json.loads(response.text)
 
 
 

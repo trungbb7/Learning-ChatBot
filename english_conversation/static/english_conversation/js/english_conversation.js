@@ -118,11 +118,13 @@ async function updateHistoryList() {
         (conv) => `
     <div class="history-item" data-id="${conv.id}">
       <div class="history-content" onclick="loadConversation(${conv.id})">
-        <div class="scenario">${conv.scenario}</div>
+        <div class="scenario">${conv.title || conv.scenario}</div>
         <div class="preview">${conv.preview}</div>
         <div class="date">${conv.date}</div>
       </div>
-      <button class="delete-conversation-btn" onclick="deleteConversation(${conv.id}, event)">
+      <button class="delete-conversation-btn" onclick="deleteConversation(${
+        conv.id
+      }, event)">
         <i class="fas fa-times"></i>
       </button>
     </div>

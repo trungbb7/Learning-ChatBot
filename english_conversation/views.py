@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from .models import Conversation, ConversationMessage
 from django.contrib.auth.models import User
-from .utils import get_initial_message, continute_conversation
+from .utils import get_initial_content, continute_conversation
 import json
 # Create your views here.
 
@@ -21,25 +21,29 @@ def start_conversation(request):
         description = data.get('description')
         bot_role = data.get('bot_role')
         
+        
+        
+        initial_content = get_initial_content(scenario, description, bot_role)
+        
         # Init new conversation
         conversation = Conversation.objects.create(
             user=request.user,
+            title=initial_content['title'],
             scenario=scenario,
             description=description,
             bot_role=bot_role
         )
         
         # Get initial message
-        initial_message = get_initial_message(scenario, description, bot_role)
         ConversationMessage.objects.create(
             conversation=conversation,
             role='bot',
-            content=initial_message
+            content=initial_content['message']
         )
         
         return JsonResponse({'success': True, 
                              'conversation_id': conversation.id, 
-                             'message': initial_message})
+                             'message': initial_content['message']})
     
     
 @csrf_exempt
@@ -96,13 +100,15 @@ def get_conversation_history(request):
     response = []
     for conversation in conversations:
         first_message = conversation.conversation_messages.first()
-        preview = f"{first_message.content[:30]}..."
-        response.append({
-            'id': conversation.id,
-            'scenario': conversation.scenario,
-            'preview': preview,
-            'date': conversation.updated_at
-        })
+        if first_message:
+            preview = f"{first_message.content[:30]}..."
+            response.append({
+                'id': conversation.id,
+                'scenario': conversation.scenario,
+                'title': conversation.title,
+                'preview': preview,
+                'date': conversation.updated_at
+            })
         
     return JsonResponse({'history': response})
         

@@ -6,8 +6,8 @@ from .models import Conversation, ConversationMessage
 
 @admin.register(Conversation)
 class ConversationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user','scenario', 'description', 'bot_role']
-    list_filter = ['id', 'user','scenario', 'description', 'bot_role']
+    list_display = ['id', 'user','title', 'scenario', 'description', 'bot_role']
+    list_filter = ['id', 'user', 'title', 'scenario', 'description', 'bot_role']
     
     
     

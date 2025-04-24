@@ -13,8 +13,9 @@ class TimeStampedModel(models.Model):
         
 class Conversation(TimeStampedModel):
     user = models.ForeignKey(User,related_name="conversations" , on_delete=models.CASCADE)
+    title = models.TextField(max_length=255, null=True, blank=True)
     scenario = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     bot_role = models.CharField(max_length=255)
     
     
