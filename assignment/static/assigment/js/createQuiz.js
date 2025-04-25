@@ -43,35 +43,41 @@ async function generateQuiz() {
     }
 
     try {
-        const response = await fetch(API_URL, {
+        const response = await fetch("/api/create-quiz", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{
-                    role: 'user',
-                    parts: [{
-                        text: `Generate a ${currentQuizType} quiz based on the following text. Create 5 questions with 4 options each (for multiple choice) or true/false options. Format the response as JSON:
-                        {
-                            "questions": [
-                                {
-                                    "question": "question text",
-                                    "options": ["option1", "option2", "option3", "option4"],
-                                    "correctAnswer": "correct option"
-                                }
-                            ]
-                        }
-                        
-                        Text: ${text}`
-                    }]
-                }]
+                currentQuizType: currentQuizType,
+                text: text
             })
+            // body: JSON.stringify({
+            //     contents: [{
+            //         role: 'user',
+            //         parts: [{
+            //             text: `Generate a ${currentQuizType} quiz based on the following text. Create 5 questions with 4 options each (for multiple choice) or true/false options. Format the response as JSON:
+            //             {
+            //                 "questions": [
+            //                     {
+            //                         "question": "question text",
+            //                         "options": ["option1", "option2", "option3", "option4"],
+            //                         "correctAnswer": "correct option"
+            //                     }
+            //                 ]
+            //             }
+                        
+            //             Text: ${text}`
+            //         }]
+            //     }]
+            // })
         });
 
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error.message);
+        const responseData = await response.json();
+        const responseText = responseData.data
+        // if (!response.ok) throw new Error(data.error.message);
 
-        // Extract JSON from the response text
-        const responseText = data.candidates[0].content.parts[0].text;
+        // // Extract JSON from the response text
+        // const responseText = data.candidates[0].content.parts[0].text;
+
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
             throw new Error('No valid JSON found in response');
