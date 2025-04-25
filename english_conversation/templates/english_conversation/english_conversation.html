@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Luyện Hội Thoại Tiếng Anh
+{% endblock %}
+
+{% block css_files %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link rel="stylesheet" href="{% static 'english_conversation/css/english_conversation.css' %}" />
+{% endblock %}
+
+{% block js_files %}
+  <script src="{% static 'english_conversation/js/english_conversation.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+  <!-- Navigation Bar -->
+  {% include 'components/header.html' %}
+
+  <header class="hero">
+    <div class="hero-overlay">
+      <div class="theme-toggle-container">
+        <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+      </div>
+      <div class="hero-content">
+        <h1>Giả Lập Hội Thoại Giao Tiếp Tiếng Anh</h1>
+        <p>Cải thiện kỹ năng giao tiếp tiếng Anh thông qua các tình huống thực tế</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <!-- Conversation History Sidebar -->
+    <div class="history-sidebar">
+      <div class="history-header">
+        <h3>Lịch sử hội thoại</h3>
+        <button class="clear-history-btn" onclick="clearHistory()"><i class="fas fa-trash"></i></button>
+      </div>
+      <div class="history-list" id="history-list">
+        <!-- History items will be added here dynamically -->
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-area">
+      <div class="scenario-container">
+        <h2 class="section-title">Chọn Tình Huống</h2>
+        <div class="scenario-selector">
+          <div class="scenario-card" data-scenario="Đặt đồ ăn" data-scenario-description="Đặt đồ ăn" data-bot-role="Nhân viên phục vụ">
+            <div class="scenario-icon">
+              <i class="fas fa-utensils"></i>
+            </div>
+            <div class="scenario-info">
+              <h3>Đặt Đồ Ăn</h3>
+              <p>Luyện tập đặt đồ ăn tại nhà hàng</p>
+            </div>
+          </div>
+          <div class="scenario-card" data-scenario="Hỏi đường" data-scenario-description="Hỏi đường" data-bot-role="Người đi đường">
+            <div class="scenario-icon">
+              <i class="fas fa-directions"></i>
+            </div>
+            <div class="scenario-info">
+              <h3>Hỏi Đường</h3>
+              <p>Học cách hỏi và chỉ đường</p>
+            </div>
+          </div>
+          <div class="scenario-card" data-scenario="Phỏng vấn" data-scenario-description="Phỏng vấn" data-bot-role="Nhà tuyển dụng">
+            <div class="scenario-icon">
+              <i class="fas fa-briefcase"></i>
+            </div>
+            <div class="scenario-info">
+              <h3>Phỏng Vấn</h3>
+              <p>Luyện tập các câu hỏi phỏng vấn thông dụng</p>
+            </div>
+          </div>
+          <div class="scenario-card" data-scenario="Gặp gỡ" data-scenario-description="Cuộc gặp gỡ làm quen" data-bot-role="Người lạ lần đầu gặp">
+            <div class="scenario-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="scenario-info">
+              <h3>Gặp Gỡ</h3>
+              <p>Học cách bắt chuyện và làm quen</p>
+            </div>
+          </div>
+          <div class="scenario-card custom-scenario" data-scenario="custom">
+            <div class="scenario-icon">
+              <i class="fas fa-edit"></i>
+            </div>
+            <div class="scenario-info">
+              <h3>Tùy Chỉnh</h3>
+              <p>Tạo tình huống riêng của bạn</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Start Button -->
+        <div class="start-button-container">
+          <button id="start-conversation-btn" class="start-btn" onclick="startConversation()"><i class="fas fa-play"></i> Bắt đầu hội thoại</button>
+        </div>
+
+        <!-- Custom Scenario Input -->
+        <div id="custom-scenario-container" class="custom-scenario-container">
+          <div class="form-group">
+            <label for="custom-scenario-input">Mô tả tình huống của bạn:</label>
+            <textarea id="custom-scenario-input" placeholder="Ví dụ: Cuộc phỏng vấn xin học bổng du học, Đặt phòng khách sạn, Hỏi thông tin về chuyến bay..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="custom-role-input">Vai trò của người đối thoại:</label>
+            <input type="text" id="custom-role-input" placeholder="Ví dụ: Giám đốc nhân sự, Nhân viên lễ tân, Hướng dẫn viên du lịch..." />
+          </div>
+          <button id="start-custom-scenario" class="start-custom-btn" onclick="startCustomScenario()"><i class="fas fa-play"></i> Bắt đầu hội thoại</button>
+        </div>
+      </div>
+
+      <div class="conversation-area">
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="input-area">
+          <textarea id="user-input" placeholder="Nhập câu trả lời của bạn bằng tiếng Anh..."></textarea>
+          <button class="send-btn" onclick="sendMessage()">
+            <i class="fas fa-paper-plane"></i>
+            Gửi
+          </button>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  {% include 'components/footer.html' %}
+{% endblock %}
