@@ -23,62 +23,66 @@ href="{% static 'assigment/css/createQuiz.css' %}" />
 
 
 {% block content %}
-    <header class="header">
-        <h1>Text Quiz Generator</h1>
-        <p>Generate quizzes from your text and test your knowledge</p>
-    </header>
+<header class="header">
+    <h1>Text Quiz Generator</h1>
+    <p>Generate quizzes from your text and test your knowledge</p>
+</header>
 
-    <button class="theme-toggle" onclick="toggleTheme()">
-        <span class="material-symbols-rounded">light_mode</span>
-    </button>
+<button class="theme-toggle" onclick="toggleTheme()">
+    <span class="material-symbols-rounded">light_mode</span>
+</button>
 
-    <div class="container">
-        <div class="input-section">
-            <textarea id="text-input" placeholder="Paste your text here..."></textarea>
-            <div class="options">
-                <div class="option active" data-type="multiple-choice">Multiple Choice</div>
-                <div class="option" data-type="true-false">True/False</div>
-            </div>
-            <div class="button-group">
-                <button onclick="generateQuiz()">
-                    <span class="material-symbols-rounded">quiz</span>
-                    Generate Quiz
-                </button>
-                <button onclick="summarizeText()" class="secondary-button">
-                    <span class="material-symbols-rounded">summarize</span>
-                    Summarize Text
-                </button>
-            </div>
+<div class="container">
+    <div class="input-section">
+        <div class="file-upload" id="file-upload">
+            <span class="material-symbols-rounded">upload_file</span>
+            <p>Click to upload PDF, DOCX, or other documents</p>
+            <input type="file" id="document-input" accept=".pdf,.docx,.doc,.txt" multiple>
+            <div class="file-info" id="file-info"></div>
         </div>
-
-        <div class="quiz-section" id="quiz-section">
-            <div id="questions-container"></div>
-            <button onclick="submitQuiz()" id="submit-button">
-                <span class="material-symbols-rounded">check_circle</span>
-                Submit Quiz
+        <textarea id="text-input" placeholder="Or paste your text here..."></textarea>
+        <div class="options">
+            <div class="option active" data-type="multiple-choice">Multiple Choice</div>
+            <div class="option" data-type="true-false">True/False</div>
+        </div>
+        <div class="button-group">
+            <button onclick="generateQuiz()">
+                <span class="material-symbols-rounded">quiz</span>
+                Generate Quiz
             </button>
-        </div>
-
-        <div class="result-section" id="result-section">
-            <h2>Quiz Results</h2>
-            <div class="score" id="score"></div>
-            <button onclick="resetQuiz()">
-                <span class="material-symbols-rounded">refresh</span>
-                Try Another Quiz
-            </button>
-        </div>
-
-        <div class="summary-section" id="summary-section" style="display: none;">
-            <h2>Text Summary</h2>
-            <div class="summary-content" id="summary-content"></div>
-            <button onclick="resetSummary()">
-                <span class="material-symbols-rounded">refresh</span>
-                Try Another Text
+            <button onclick="summarizeText()" class="secondary-button">
+                <span class="material-symbols-rounded">summarize</span>
+                Summarize Text
             </button>
         </div>
     </div>
 
-    
+    <div class="quiz-section" id="quiz-section">
+        <div id="questions-container"></div>
+        <button onclick="submitQuiz()" id="submit-button">
+            <span class="material-symbols-rounded">check_circle</span>
+            Submit Quiz
+        </button>
+    </div>
+
+    <div class="result-section" id="result-section">
+        <h2>Quiz Results</h2>
+        <div class="score" id="score"></div>
+        <button onclick="resetQuiz()">
+            <span class="material-symbols-rounded">refresh</span>
+            Try Another Quiz
+        </button>
+    </div>
+
+    <div class="summary-section" id="summary-section" style="display: none;">
+        <h2>Text Summary</h2>
+        <div class="summary-content" id="summary-content"></div>
+        <button onclick="resetSummary()">
+            <span class="material-symbols-rounded">refresh</span>
+            Try Another Text
+        </button>
+    </div>
+</div>
 {% endblock content %}
     
     

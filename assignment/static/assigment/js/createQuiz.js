@@ -35,6 +35,75 @@ document.querySelectorAll('.option').forEach(option => {
     });
 });
 
+// File upload handling
+document.getElementById('file-upload').addEventListener('click', () => {
+    document.getElementById('document-input').click();
+});
+
+document.getElementById('document-input').addEventListener('change', async (e) => {
+    const files = e.target.files;
+    if (!files.length) return;
+
+    const fileInfo = document.getElementById('file-info');
+    fileInfo.innerHTML = `Selected: ${files.length} file(s)`;
+
+    // Show loading indicator
+    const loading = document.createElement('div');
+    loading.className = 'loading';
+    loading.innerHTML = '<span class="material-symbols-rounded">sync</span> Processing document...';
+    fileInfo.appendChild(loading);
+    loading.style.display = 'block';
+
+    try {
+        // For PDF files
+        if (files[0].name.endsWith('.pdf')) {
+            const formData = new FormData();
+            formData.append('file', files[0]);
+
+            // You would need to implement a server-side endpoint to handle PDF processing
+            // This is a placeholder for the actual implementation
+            const response = await fetch('/api/process-pdf', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Failed to process PDF');
+            const text = await response.text();
+            document.getElementById('text-input').value = text;
+        }
+        // For DOCX files
+        else if (files[0].name.endsWith('.docx')) {
+            const formData = new FormData();
+            formData.append('file', files[0]);
+
+            // You would need to implement a server-side endpoint to handle DOCX processing
+            const response = await fetch('/api/process-docx', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Failed to process DOCX');
+            const text = await response.text();
+            document.getElementById('text-input').value = text;
+        }
+        // For TXT files
+        else if (files[0].name.endsWith('.txt')) {
+            const text = await files[0].text();
+            document.getElementById('text-input').value = text;
+        }
+        else {
+            throw new Error('Unsupported file format');
+        }
+
+        loading.style.display = 'none';
+        fileInfo.innerHTML = `Successfully processed: ${files[0].name}`;
+    } catch (error) {
+        console.error('Error:', error);
+        loading.style.display = 'none';
+        fileInfo.innerHTML = `Error: ${error.message}`;
+    }
+});
+
 async function generateQuiz() {
     const text = document.getElementById('text-input').value.trim();
     if (!text) {
