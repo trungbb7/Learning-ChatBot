@@ -326,4 +326,3 @@
             currentHintNumber = 1;
             hints = [];
         }
-  
