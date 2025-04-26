@@ -1,4 +1,3 @@
-
         // const API_KEY = "AIzaSyDFzsQxciE0WYHaXd0968bBMdZIkxZlRp0";
         // const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
@@ -36,11 +35,19 @@
             return text;
         }
 
+        // function updateThemeIcon() {
+        //     const icon = document.querySelector('.theme-toggle-as .material-symbols-rounded');
+        //     const isDark = document.body.getAttribute('data-theme') === 'dark';
+        //     icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+        // }
         function updateThemeIcon() {
-            const icon = document.querySelector('.theme-toggle .material-symbols-rounded');
+            const icon = document.querySelector('.theme-toggle-as .material-symbols-rounded');
             const isDark = document.body.getAttribute('data-theme') === 'dark';
-            icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+            if (icon) {
+                icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+            }
         }
+        
 
         // Load saved theme
         const savedTheme = localStorage.getItem('theme') || 'light';
@@ -48,9 +55,9 @@
         updateThemeIcon();
 
         // Subject selection
-        document.querySelectorAll('.subject-button').forEach(button => {
+        document.querySelectorAll('.subject-button-as').forEach(button => {
             button.addEventListener('click', () => {
-                document.querySelectorAll('.subject-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.subject-button-as').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
                 currentSubject = button.dataset.subject;
                 clearText();
@@ -58,23 +65,23 @@
         });
 
         // Input method handling
-        document.querySelectorAll('.input-method-button').forEach(button => {
+        document.querySelectorAll('.input-method-button-as').forEach(button => {
             
             button.addEventListener('click', () => {
-                document.querySelectorAll('.input-method-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.input-method-button-as').forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
 
                 const method = button.dataset.method;
-                document.getElementById('text-input-container').style.display = method === 'text' ? 'block' : 'none';
-                document.getElementById('image-input-container').style.display = method === 'image' ? 'block' : 'none';
+                document.getElementById('text-input-container-as').style.display = method === 'text' ? 'block' : 'none';
+                document.getElementById('image-input-container-as').style.display = method === 'image' ? 'block' : 'none';
             });
         });
 
         // Image upload handling
-        const imageUploadArea = document.getElementById('image-upload-area');
-        const imageInput = document.getElementById('image-input');
-        const imagePreview = document.getElementById('image-preview');
-        const previewImage = document.getElementById('preview-image');
+        const imageUploadArea = document.getElementById('image-upload-area-as');
+        const imageInput = document.getElementById('image-input-as');
+        const imagePreview = document.getElementById('image-preview-as');
+        const previewImage = document.getElementById('preview-image-as');
 
         imageUploadArea.addEventListener('click', () => imageInput.click());
         imageUploadArea.addEventListener('dragover', (e) => {
@@ -105,7 +112,7 @@
             reader.onload = (e) => {
                 previewImage.src = e.target.result;
                 imagePreview.style.display = 'block';
-                imageUploadArea.querySelector('.upload-placeholder').style.display = 'none';
+                imageUploadArea.querySelector('.upload-placeholder-as').style.display = 'none';
             };
             reader.readAsDataURL(file);
         }
@@ -114,13 +121,13 @@
             imageInput.value = '';
             previewImage.src = '';
             imagePreview.style.display = 'none';
-            imageUploadArea.querySelector('.upload-placeholder').style.display = 'flex';
+            imageUploadArea.querySelector('.upload-placeholder-as').style.display = 'flex';
         }
 
         // LaTeX preview
-        document.getElementById('input-text').addEventListener('input', () => {
-            const text = document.getElementById('input-text').value;
-            const preview = document.getElementById('latex-preview');
+        document.getElementById('input-text-as').addEventListener('input', () => {
+            const text = document.getElementById('input-text-as').value;
+            const preview = document.getElementById('latex-preview-as');
             preview.innerHTML = text;
             if (MathJax.typesetPromise) {
                 MathJax.typesetPromise([preview]);
@@ -129,14 +136,14 @@
 
         // Get hint
         async function getHint() {
-            const inputMethod = document.querySelector('.input-method-button.active').dataset.method;
+            const inputMethod = document.querySelector('.input-method-button-as.active').dataset.method;
             let inputText = '';
-            const loading = document.getElementById('loading');
-            const hintContainer = document.getElementById('hint-container');
-            const hintContent = document.getElementById('hint-content');
+            const loading = document.getElementById('loading-as');
+            const hintContainer = document.getElementById('hint-container-as');
+            const hintContent = document.getElementById('hint-content-as');
 
             if (inputMethod === 'text') {
-                inputText = document.getElementById('input-text').value.trim();
+                inputText = document.getElementById('input-text-as').value.trim();
             } else {
                 const imageFile = imageInput.files[0];
                 if (!imageFile) {
@@ -148,7 +155,7 @@
                     loading.style.display = 'block';
                     inputText = await convertImageToText(imageFile);
                     // Hiển thị văn bản đã nhận dạng trong textarea để người dùng có thể chỉnh sửa
-                    document.getElementById('input-text').value = inputText;
+                    document.getElementById('input-text-as').value = inputText;
                 } catch (error) {
                     alert('Lỗi khi xử lý hình ảnh: ' + error.message);
                     return;
@@ -184,7 +191,7 @@
                 currentHintNumber = 1;
                 showCurrentHint();
             } catch (error) {
-                hintContent.innerHTML = `<p class="error-message">Lỗi: ${error.message}</p>`;
+                hintContent.innerHTML = `<p class="error-message-as">Lỗi: ${error.message}</p>`;
             } finally {
                 loading.style.display = 'none';
                 hintContainer.style.display = 'block';
@@ -192,8 +199,8 @@
         }
 
         function showCurrentHint() {
-            const hintContent = document.getElementById('hint-content');
-            const hintNumber = document.getElementById('hint-number');
+            const hintContent = document.getElementById('hint-content-as');
+            const hintNumber = document.getElementById('hint-number-as');
 
             if (currentHintNumber <= hints.length) {
                 hintNumber.textContent = currentHintNumber;
@@ -221,15 +228,15 @@
         }
 
         async function solveExercise() {
-            const inputText = document.getElementById('input-text').value.trim();
+            const inputText = document.getElementById('input-text-as').value.trim();
             if (!inputText) {
                 alert('Vui lòng nhập đề bài cần giải');
                 return;
             }
 
-            const loading = document.getElementById('loading');
-            const hintContainer = document.getElementById('hint-container');
-            const hintContent = document.getElementById('hint-content');
+            const loading = document.getElementById('loading-as');
+            const hintContainer = document.getElementById('hint-container-as');
+            const hintContent = document.getElementById('hint-content-as');
 
             loading.style.display = 'block';
             hintContainer.style.display = 'none';
@@ -254,9 +261,9 @@
                 if (MathJax.typesetPromise) {
                     MathJax.typesetPromise([hintContent]);
                 }
-                document.getElementById('hint-number').textContent = 'Giải';
+                document.getElementById('hint-number-as').textContent = 'Giải';
             } catch (error) {
-                hintContent.innerHTML = `<p class="error-message">Lỗi: ${error.message}</p>`;
+                hintContent.innerHTML = `<p class="error-message-as">Lỗi: ${error.message}</p>`;
             } finally {
                 loading.style.display = 'none';
                 hintContainer.style.display = 'block';
@@ -279,19 +286,6 @@
                             },
                             body: JSON.stringify({
                                 data: base64Image
-                                // contents: [{
-                                //     parts: [
-                                //         {
-                                //             text: "Hãy đọc và trích xuất văn bản từ hình ảnh này. Chỉ trả về văn bản đã được trích xuất, không thêm bất kỳ bình luận nào."
-                                //         },
-                                //         {
-                                //             inline_data: {
-                                //                 mime_type: "image/jpeg",
-                                //                 data: base64Image
-                                //             }
-                                //         }
-                                //     ]
-                                // }]
                             })
                         });
 
@@ -300,8 +294,6 @@
                             throw new Error(data.error?.message || 'Lỗi khi xử lý hình ảnh');
                         }
 
-                        // Trích xuất văn bản từ kết quả
-                        // const text = data.candidates[0]?.content?.parts[0]?.text || '';
                         const text = data.hints;
                         if (!text) {
                             throw new Error('Không thể nhận dạng văn bản từ hình ảnh');
@@ -319,9 +311,9 @@
         }
 
         function clearText() {
-            document.getElementById('input-text').value = '';
-            document.getElementById('hint-container').style.display = 'none';
-            document.getElementById('latex-preview').innerHTML = '';
+            document.getElementById('input-text-as').value = '';
+            document.getElementById('hint-container-as').style.display = 'none';
+            document.getElementById('latex-preview-as').innerHTML = '';
             removeImage();
             currentHintNumber = 1;
             hints = [];
