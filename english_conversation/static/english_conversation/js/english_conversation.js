@@ -468,7 +468,7 @@ async function startConversation() {
 
   try {
     // Generate initial message based on custom scenario
-    const response = await fetch("/api/english-conversation/get-init-message", {
+    const response = await fetch("/api/english-conversation/start", {
       method: "POST",
       body: JSON.stringify({
         scenario: currentScenario,
