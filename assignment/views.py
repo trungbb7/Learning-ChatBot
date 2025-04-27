@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
-import pdfplumber
 import json
 import os
 import fitz  
+from docx import Document
 import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -84,16 +84,9 @@ def process_pdf(request):
 
             # Chuẩn bị prompt
             prompt = f"""
-            You are a quiz generator based strictly on provided text.
+                Hãy tạo ra 5 câu hỏi trắc nghiệm, mỗi câu có 4 lựa chọn dựa trên nội dung trong file được cung cấp
 
-            Rules:
-            - Only generate questions and answers based on the given text.
-            - Do not invent or add any information not found in the text.
-            - If the text does not contain enough information for a question, skip that question.
-
-            Generate 5 multiple-choice questions.
-
-            Text:
+            Văn bản:
             {extracted_text}
             """
 
@@ -112,6 +105,68 @@ def process_pdf(request):
 
 
 
+@csrf_exempt
+def process_docx(request):
+    if request.method == 'POST':
+        uploaded_file = request.FILES.get('file')
+
+        if not uploaded_file:
+            return JsonResponse({'error': 'No file uploaded'}, status=400)
+
+        try:
+            # Đọc file DOCX
+            doc = Document(uploaded_file)
+            extracted_text = "\n".join([para.text for para in doc.paragraphs if para.text.strip()])
+
+            # Chuẩn bị prompt
+            prompt = f"""
+                Hãy tạo ra 5 câu hỏi trắc nghiệm, mỗi câu có 4 lựa chọn dựa trên nội dung trong file được cung cấp.
+            Văn bản:
+            {extracted_text}
+            """
+
+            # Gửi cho Gemini
+            model = genai.GenerativeModel('gemini-1.5-pro-latest')
+            response = model.generate_content(prompt)
+
+            return JsonResponse({'text': response.text})
+
+        except Exception as e:
+            print("Error:", e)
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request'}, status=405)
 
 
 
+
+@csrf_exempt
+def process_txt(request):
+    if request.method == 'POST':
+        uploaded_file = request.FILES.get('file')
+
+        if not uploaded_file:
+            return JsonResponse({'error': 'No file uploaded'}, status=400)
+
+        try:
+            # Đọc nội dung file TXT
+            extracted_text = uploaded_file.read().decode('utf-8')
+
+            # Chuẩn bị prompt
+            prompt = f"""
+                Hãy tạo ra 5 câu hỏi trắc nghiệm, mỗi câu có 4 lựa chọn dựa trên nội dung trong file được cung cấp.
+            Văn bản:
+            {extracted_text}
+            """
+
+            # Gửi cho Gemini
+            model = genai.GenerativeModel('gemini-1.5-pro-latest')
+            response = model.generate_content(prompt)
+
+            return JsonResponse({'text': response.text})
+
+        except Exception as e:
+            print("Error:", e)
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request'}, status=405)
