@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tóm tắt văn bản</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .loading {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card p-4">
+            <h2 class="text-center mb-4">Tóm tắt văn bản</h2>
+            <form id="summarizeForm">
+                <div class="mb-3">
+                    <label for="text" class="form-label">Nhập văn bản cần tóm tắt:</label>
+                    <textarea class="form-control" id="text" rows="6" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Tóm tắt</button>
+            </form>
+            
+            <div class="loading text-center mt-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
+
+            <div id="result" class="mt-4" style="display: none;">
+                <h4>Tóm tắt:</h4>
+                <div class="card bg-light p-3">
+                    <p id="summary"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('summarizeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const text = document.getElementById('text').value;
+            const loading = document.querySelector('.loading');
+            const result = document.getElementById('result');
+            const summary = document.getElementById('summary');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            try {
+                const response = await fetch('/summarize/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `text=${encodeURIComponent(text)}`
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    summary.textContent = data.summary;
+                    result.style.display = 'block';
+                } else {
+                    alert(data.error || 'Có lỗi xảy ra');
+                }
+            } catch (error) {
+                alert('Có lỗi xảy ra khi gửi yêu cầu');
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> 
