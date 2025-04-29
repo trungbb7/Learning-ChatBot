@@ -84,7 +84,7 @@ def process_pdf(request):
 
             # Chuẩn bị prompt
             prompt = f"""
-                Hãy tạo ra 5 câu hỏi trắc nghiệm, mỗi câu có 4 lựa chọn dựa trên nội dung trong file được cung cấp
+                Hãy tạo ra 10 câu hỏi trắc nghiệm, mỗi câu có 4 lựa chọn dựa trên nội dung trong file được cung cấp
 
             Văn bản:
             {extracted_text}
@@ -120,7 +120,7 @@ def process_docx(request):
 
             # Chuẩn bị prompt
             prompt = f"""
-                Hãy tạo ra 5 câu hỏi trắc nghiệm, mỗi câu có 4 lựa chọn dựa trên nội dung trong file được cung cấp.
+                Hãy tạo ra 10 câu hỏi trắc nghiệm, mỗi câu có 4 lựa chọn dựa trên nội dung trong file được cung cấp.
             Văn bản:
             {extracted_text}
             """
@@ -154,7 +154,8 @@ def process_txt(request):
 
             # Chuẩn bị prompt
             prompt = f"""
-                Hãy tạo ra 5 câu hỏi trắc nghiệm, mỗi câu có 4 lựa chọn dựa trên nội dung trong file được cung cấp.
+                Hãy tạo ra 10 câu hỏi trắc nghiệm, mỗi câu có 4 lựa chọn dựa trên nội dung trong file được cung cấp.
+                Dùng tiếng Việt
             Văn bản:
             {extracted_text}
             """

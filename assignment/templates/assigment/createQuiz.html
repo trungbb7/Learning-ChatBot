@@ -23,14 +23,20 @@ href="{% static 'assigment/css/createQuiz.css' %}" />
 
 
 {% block content %}
-<header class="header">
-    <h1>Text Quiz Generator</h1>
-    <p>Generate quizzes from your text and test your knowledge</p>
-</header>
+<!-- Navigation Bar -->
+{% include 'components/header.html' %}
 
-<button class="theme-toggle" onclick="toggleTheme()">
-    <span class="material-symbols-rounded">light_mode</span>
-</button>
+<header class="hero">
+  <div class="hero-overlay">
+    <div class="theme-toggle-container">
+      <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+    </div>
+    <div class="hero-content">
+      <h1>Tạo bài tập trắc nghiệm từ tài liệu</h1>
+      <p>Kiểm tra trình độ thông qua các bài tập trắc nghiệm</p>
+    </div>
+  </div>
+</header>
 
 <div class="container">
     <div class="input-section">
@@ -41,19 +47,10 @@ href="{% static 'assigment/css/createQuiz.css' %}" />
             <div class="file-info" id="file-info"></div>
         </div>
         <textarea id="text-input" placeholder="Or paste your text here..."></textarea>
-        <div class="options">
-            <div class="option active" data-type="multiple-choice">Multiple Choice</div>
-            <div class="option" data-type="true-false">True/False</div>
-        </div>
         <div class="button-group">
             <button onclick="generateQuiz()">
                 <span class="material-symbols-rounded">quiz</span>
                 Generate Quiz
-            </button>
-            <button onclick="summarizeText()" class="secondary-button">
-                <span class="material-symbols-rounded">summarize</span>
-                Summarize Text
-            </button>
         </div>
     </div>
 
@@ -83,6 +80,8 @@ href="{% static 'assigment/css/createQuiz.css' %}" />
         </button>
     </div>
 </div>
+<!-- Footer -->
+{% include 'components/footer.html' %}
 {% endblock content %}
     
     

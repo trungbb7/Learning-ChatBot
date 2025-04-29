@@ -15,10 +15,14 @@ const API_KEY = "AIzaSyDFzsQxciE0WYHaXd0968bBMdZIkxZlRp0";
         }
 
         function updateThemeIcon() {
-            const icon = document.querySelector('.theme-toggle .material-symbols-rounded');
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            icon.textContent = isDark ? 'light_mode' : 'dark_mode';
-        }
+            const icon = document.querySelector(".theme-toggle i");
+            if (icon) {
+              const isDark = document.body.getAttribute("data-theme") === "dark";
+              icon.className = isDark ? "fas fa-sun" : "fas fa-moon";
+            } else {
+              console.warn("Theme toggle icon not found");
+            }
+          }
 
         // Load saved theme
         const savedTheme = localStorage.getItem('theme') || 'light';
@@ -239,43 +243,6 @@ const API_KEY = "AIzaSyDFzsQxciE0WYHaXd0968bBMdZIkxZlRp0";
             userAnswers = [];
         }
 
-        async function summarizeText() {
-            const text = document.getElementById('text-input').value.trim();
-            if (!text) {
-                alert('Please enter some text first!');
-                return;
-            }
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            role: 'user',
-                            parts: [{
-                                text: `Please summarize the following text in a clear and concise way. Focus on the main points and key information:
-
-                                ${text}`
-                            }]
-                        }]
-                    })
-                });
-
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error.message);
-
-                const summary = data.candidates[0].content.parts[0].text;
-                document.getElementById('summary-content').textContent = summary;
-                document.querySelector('.input-section').style.display = 'none';
-                document.getElementById('quiz-section').style.display = 'none';
-                document.getElementById('result-section').style.display = 'none';
-                document.getElementById('summary-section').style.display = 'block';
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error generating summary. Please try again.');
-            }
-        }
 
         function resetSummary() {
             document.getElementById('text-input').value = '';
