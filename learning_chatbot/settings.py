@@ -47,6 +47,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 INSTALLED_APPS = [
     "demo",
     "auths",
+    "assignment_support",
     "english_conversation",
     "corsheaders",
     "django.contrib.admin",
@@ -55,6 +56,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "assignment"
 ]
 
 MIDDLEWARE = [
