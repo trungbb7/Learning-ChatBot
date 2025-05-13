@@ -4,48 +4,6 @@ let scenarioDescription = null;
 
 let currentConversationId = null;
 
-// Theme handling
-function toggleTheme() {
-  const body = document.body;
-  const isDark = body.getAttribute("data-theme") === "dark";
-  const newTheme = isDark ? "light" : "dark";
-
-  // Apply transition class for smooth transition
-  body.classList.add("theme-transition");
-
-  // Update theme
-  body.setAttribute("data-theme", newTheme);
-  localStorage.setItem("theme", newTheme);
-
-  // Update icon
-  updateThemeIcon();
-
-  // Remove transition class after transition completes
-  setTimeout(() => {
-    body.classList.remove("theme-transition");
-  }, 500);
-
-  console.log(`Theme changed to: ${newTheme}`);
-}
-
-function updateThemeIcon() {
-  const icon = document.querySelector(".theme-toggle i");
-  if (icon) {
-    const isDark = document.body.getAttribute("data-theme") === "dark";
-    icon.className = isDark ? "fas fa-sun" : "fas fa-moon";
-  } else {
-    console.warn("Theme toggle icon not found");
-  }
-}
-
-// Initialize theme
-function initTheme() {
-  const savedTheme = localStorage.getItem("theme") || "light";
-  document.body.setAttribute("data-theme", savedTheme);
-  console.log(`Initialized theme: ${savedTheme}`);
-  updateThemeIcon();
-}
-
 // Document ready event
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM loaded, initializing application...");
@@ -97,9 +55,208 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Debug info
   console.log("Application initialized successfully");
 });
+
+async function sendMessage() {
+  const userInput = document.getElementById("user-input");
+  if (!userInput) {
+    console.error("User input element not found");
+    return;
+  }
+
+  const text = userInput.value.trim();
+  if (!text) return;
+
+  // Disable input while processing
+  userInput.disabled = true;
+  const sendButton = document.querySelector(".send-btn");
+  if (sendButton) sendButton.disabled = true;
+
+  addMessage(text, "user");
+  userInput.value = "";
+
+  showLoadingIndicator();
+
+  try {
+    // 6.1.18. Request POST /api/english-conversation/continue {conversation_id, message}
+    const response = await fetch("api/english-conversation/continue", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        conversation_id: currentConversationId,
+        user_message: text,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // 6.1.30. Response {message, feedback}
+    const data = await response.json();
+
+    removeLoadingIndicator();
+
+    const responseText = data.message;
+    const feedback = data.feedback;
+
+    // 6.1.31. Cập nhật message và feedback
+
+    if (responseText) {
+      addMessage(responseText, "bot");
+    }
+
+    if (feedback) {
+      showFeedback(feedback);
+
+      const messages = document.querySelectorAll(".message.user");
+      const lastUserMessageElement = messages[messages.length - 1];
+      if (lastUserMessageElement) {
+        lastUserMessageElement.setAttribute("data-feedback", feedback);
+      }
+    }
+  } catch (error) {
+    removeLoadingIndicator();
+
+    console.error("Error:", error);
+    addMessage("I'm sorry, I encountered an error. Please try again.", "bot");
+  } finally {
+    // Re-enable input
+    userInput.disabled = false;
+    if (sendButton) sendButton.disabled = false;
+  }
+}
+
+function showFeedback(feedback) {
+  const feedbackDiv = document.getElementById("feedback");
+  if (!feedbackDiv) {
+    console.error("Feedback element not found");
+    return;
+  }
+
+  feedbackDiv.textContent = feedback;
+  feedbackDiv.style.display = "block";
+  feedbackDiv.className = "feedback grammar";
+
+  scrollIntoInput();
+}
+
+function addMessage(text, sender, feedback = null) {
+  const chatMessages = document.getElementById("chat-messages");
+  if (!chatMessages) {
+    console.error("Chat messages container not found");
+    return;
+  }
+
+  const messageDiv = document.createElement("div");
+  messageDiv.className = `message ${sender}`;
+  messageDiv.textContent = text;
+
+  // Add feedback data attribute if available
+  if (feedback) {
+    messageDiv.setAttribute("data-feedback", feedback);
+  }
+
+  chatMessages.appendChild(messageDiv);
+
+  scrollIntoInput();
+
+  // Log the message for debugging
+  console.log(`Added ${sender} message:`, text);
+}
+
+// Custom scenario handling
+function startCustomScenario() {
+  const customScenarioInput = document.getElementById("custom-scenario-input");
+  const customRoleInput = document.getElementById("custom-role-input");
+  if (!customScenarioInput || !customRoleInput) return;
+
+  const scenarioDescriptionData = customScenarioInput.value.trim();
+  const roleDescriptionData = customRoleInput.value.trim();
+
+  if (!scenarioDescriptionData) {
+    alert("Vui lòng nhập mô tả tình huống trước khi bắt đầu.");
+    customScenarioInput.focus();
+    return;
+  }
+
+  if (!roleDescriptionData) {
+    alert("Vui lòng nhập vai trò của người đối thoại trước khi bắt đầu.");
+    customRoleInput.focus();
+    return;
+  }
+
+  scenarioDescription = scenarioDescriptionData;
+  bot_role = roleDescriptionData;
+
+  startConversation();
+}
+
+async function startConversation() {
+  const chatMessages = document.getElementById("chat-messages");
+  if (!chatMessages) {
+    console.error("Chat messages container not found");
+    return;
+  }
+
+  if (!currentScenario || !scenarioDescription) {
+    alert("Vui lòng chọn chủ đề");
+    return;
+  }
+
+  // hide feedback
+  const feedbackDiv = document.getElementById("feedback");
+  feedbackDiv.style.display = "none";
+
+  // Clear the chat messages
+  chatMessages.innerHTML = "";
+
+  // Show loading indicator
+  showLoadingIndicator();
+
+  try {
+    // 6.1.8. Request POST /api/english-conversation/start {scenario, description, bot_role}
+    const response = await fetch("/api/english-conversation/start", {
+      method: "POST",
+      body: JSON.stringify({
+        scenario: currentScenario,
+        description: scenarioDescription,
+        bot_role: bot_role,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    updateHistoryList();
+
+    // 6.1.15. Response {message, conversation_id}
+    const data = await response.json();
+
+    const initialMessage = data.message;
+    const conversationId = data.conversation_id;
+
+    // Remove loading indicator
+    removeLoadingIndicator();
+
+    // 6.1.16. Hiển thị lời chào mở đầu cho đoạn chat
+    if (initialMessage && conversationId) {
+      addMessage(initialMessage, "bot");
+      currentConversationId = conversationId;
+    }
+  } catch (error) {
+    // Remove loading indicator if still present
+    removeLoadingIndicator();
+
+    console.error("Error:", error);
+    addMessage(
+      "I'm sorry, I encountered an error starting the conversation. Please try again.",
+      "bot"
+    );
+  }
+}
 
 // Update history list with delete buttons for each conversation
 async function updateHistoryList() {
@@ -136,7 +293,6 @@ async function updateHistoryList() {
   }
 }
 
-// Function to delete a specific conversation
 async function deleteConversation(id, event) {
   // Stop event propagation to prevent loading the conversation when deleting it
   if (event) {
@@ -304,206 +460,44 @@ function removeLoadingIndicator() {
   }
 }
 
-// Update sendMessage function
-async function sendMessage() {
-  const userInput = document.getElementById("user-input");
-  if (!userInput) {
-    console.error("User input element not found");
-    return;
-  }
+// Theme handling
+function toggleTheme() {
+  const body = document.body;
+  const isDark = body.getAttribute("data-theme") === "dark";
+  const newTheme = isDark ? "light" : "dark";
 
-  const text = userInput.value.trim();
-  if (!text) return;
+  // Apply transition class for smooth transition
+  body.classList.add("theme-transition");
 
-  // Disable input while processing
-  userInput.disabled = true;
-  const sendButton = document.querySelector(".send-btn");
-  if (sendButton) sendButton.disabled = true;
+  // Update theme
+  body.setAttribute("data-theme", newTheme);
+  localStorage.setItem("theme", newTheme);
 
-  // Add user message
-  addMessage(text, "user");
-  userInput.value = "";
+  // Update icon
+  updateThemeIcon();
 
-  // Show loading indicator
-  showLoadingIndicator();
+  // Remove transition class after transition completes
+  setTimeout(() => {
+    body.classList.remove("theme-transition");
+  }, 500);
 
-  try {
-    const response = await fetch("api/english-conversation/continue", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        conversation_id: currentConversationId,
-        user_message: text,
-      }),
-    });
+  console.log(`Theme changed to: ${newTheme}`);
+}
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("API Response:", data);
-
-    // Remove loading indicator before adding the response
-    removeLoadingIndicator();
-
-    const responseText = data.message;
-    const feedback = data.feedback;
-
-    if (responseText) {
-      addMessage(responseText, "bot");
-    }
-
-    // Update the feedback for the user's message in conversationHistory
-    if (feedback) {
-      // Update the feedback for the user's message in conversationHistory
-      showFeedback(feedback);
-
-      // Update the message element with feedback
-      const messages = document.querySelectorAll(".message.user");
-      const lastUserMessageElement = messages[messages.length - 1];
-      if (lastUserMessageElement) {
-        lastUserMessageElement.setAttribute("data-feedback", feedback);
-      }
-    }
-  } catch (error) {
-    // Remove loading indicator on error
-    removeLoadingIndicator();
-
-    console.error("Error:", error);
-    addMessage("I'm sorry, I encountered an error. Please try again.", "bot");
-  } finally {
-    // Re-enable input
-    userInput.disabled = false;
-    if (sendButton) sendButton.disabled = false;
+function updateThemeIcon() {
+  const icon = document.querySelector(".theme-toggle i");
+  if (icon) {
+    const isDark = document.body.getAttribute("data-theme") === "dark";
+    icon.className = isDark ? "fas fa-sun" : "fas fa-moon";
+  } else {
+    console.warn("Theme toggle icon not found");
   }
 }
 
-function showFeedback(feedback) {
-  const feedbackDiv = document.getElementById("feedback");
-  if (!feedbackDiv) {
-    console.error("Feedback element not found");
-    return;
-  }
-
-  feedbackDiv.textContent = feedback;
-  feedbackDiv.style.display = "block";
-  feedbackDiv.className = "feedback grammar";
-
-  scrollIntoInput();
-}
-
-function addMessage(text, sender, feedback = null) {
-  const chatMessages = document.getElementById("chat-messages");
-  if (!chatMessages) {
-    console.error("Chat messages container not found");
-    return;
-  }
-
-  const messageDiv = document.createElement("div");
-  messageDiv.className = `message ${sender}`;
-  messageDiv.textContent = text;
-
-  // Add feedback data attribute if available
-  if (feedback) {
-    messageDiv.setAttribute("data-feedback", feedback);
-  }
-
-  chatMessages.appendChild(messageDiv);
-
-  scrollIntoInput();
-
-  // Log the message for debugging
-  console.log(`Added ${sender} message:`, text);
-}
-
-// Custom scenario handling
-function startCustomScenario() {
-  const customScenarioInput = document.getElementById("custom-scenario-input");
-  const customRoleInput = document.getElementById("custom-role-input");
-  if (!customScenarioInput || !customRoleInput) return;
-
-  const scenarioDescriptionData = customScenarioInput.value.trim();
-  const roleDescriptionData = customRoleInput.value.trim();
-
-  if (!scenarioDescriptionData) {
-    alert("Vui lòng nhập mô tả tình huống trước khi bắt đầu.");
-    customScenarioInput.focus();
-    return;
-  }
-
-  if (!roleDescriptionData) {
-    alert("Vui lòng nhập vai trò của người đối thoại trước khi bắt đầu.");
-    customRoleInput.focus();
-    return;
-  }
-
-  scenarioDescription = scenarioDescriptionData;
-  bot_role = roleDescriptionData;
-
-  startConversation();
-}
-
-async function startConversation() {
-  const chatMessages = document.getElementById("chat-messages");
-  if (!chatMessages) {
-    console.error("Chat messages container not found");
-    return;
-  }
-
-  if (!currentScenario || !scenarioDescription) {
-    alert("Vui lòng chọn chủ đề");
-    return;
-  }
-
-  // hide feedback
-  const feedbackDiv = document.getElementById("feedback");
-  feedbackDiv.style.display = "none";
-
-  // Clear the chat messages
-  chatMessages.innerHTML = "";
-
-  // Show loading indicator
-  showLoadingIndicator();
-
-  try {
-    // Generate initial message based on custom scenario
-    const response = await fetch("/api/english-conversation/start", {
-      method: "POST",
-      body: JSON.stringify({
-        scenario: currentScenario,
-        description: scenarioDescription,
-        bot_role: bot_role,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    updateHistoryList();
-
-    const data = await response.json();
-
-    const initialMessage = data.message;
-    const conversationId = data.conversation_id;
-
-    // Remove loading indicator
-    removeLoadingIndicator();
-
-    // Display the initial message
-    if (initialMessage && conversationId) {
-      addMessage(initialMessage, "bot");
-      currentConversationId = conversationId;
-    }
-  } catch (error) {
-    // Remove loading indicator if still present
-    removeLoadingIndicator();
-
-    console.error("Error:", error);
-    addMessage(
-      "I'm sorry, I encountered an error starting the conversation. Please try again.",
-      "bot"
-    );
-  }
+// Initialize theme
+function initTheme() {
+  const savedTheme = localStorage.getItem("theme") || "light";
+  document.body.setAttribute("data-theme", savedTheme);
+  console.log(`Initialized theme: ${savedTheme}`);
+  updateThemeIcon();
 }
