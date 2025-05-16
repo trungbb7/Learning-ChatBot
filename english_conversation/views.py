@@ -14,8 +14,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-GEMINI_MODEL = os.getenv('GEMINI_MODEL')
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL")
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -24,7 +24,7 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 @login_required
 def english_conversation(request):
-    # 6.1.3. Gọi hàm render cho template "Giả lập hội thoại giao tiếp tiếng Anh". 
+    # 6.1.3. Gọi hàm render cho template "Giả lập hội thoại giao tiếp tiếng Anh".
     # & 6.1.4. Trả về template đã được render.
     template = render(request, "english_conversation/english_conversation.html")
     # 6.1.5. Response trang html "Giả lập hội thoại giao tiếp tiếng Anh"
@@ -39,9 +39,8 @@ def start_conversation(request):
         scenario = data.get("scenario")
         description = data.get("description")
         bot_role = data.get("bot_role")
-        
-        
-        # 6.1.10. Chuẩn bị promt cho lời chào mở đầu (scenario, description, bot_role) 
+
+        # 6.1.10. Chuẩn bị promt cho lời chào mở đầu (scenario, description, bot_role)
         prompt = f"""
                 Tôi muốn luyện tập hội thoại giao tiếp tiếng Anh trong ngữ cảnh: "{description}".
                 Bạn sẽ đóng vai là: "{bot_role}"
@@ -52,18 +51,19 @@ def start_conversation(request):
                 3. Tạo tiêu đề ngắn gọn cho cuộc hội thoại (tối đa 255 ký tự)
                 3. Sử dụng tiếng Anh.  
                 """
-                
-        # 6.1.11. Yêu cầu tạo lời chào mở đầu (prompt) 
+
+        # 6.1.11. Yêu cầu tạo lời chào mở đầu (prompt)
         # & 6.1.12. Trả về lời chào mở đầu
-        initial_content = client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents = prompt,
-        config=genai.types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=InitialMessage,
-        ))
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+            config=genai.types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=InitialMessage,
+            ),
+        )
 
-
+        initial_content = json.loads(response.text)
 
         # 6.1.13. Tạo cuộc hội thoại mới
         conversation = Conversation.objects.create(
@@ -117,12 +117,11 @@ def continue_conversation(request):
             for message in previous_messages:
                 name = "Tôi" if message.role == "User" else conversation.bot_role
                 formated_conversation += f"{name}: {message.content}\n"
-                
-            
+
             # 6.1.26. Chuẩn bị prompt tiếp tục cuộc hội thoại(history, description, bot_role)
             description = conversation.description
             bot_role = conversation.bot_role
-            
+
             prompt = f"""
                         Tiếp tục cuộc hội thoại trong ngữ cảnh: "{description}".
                         Vai trò của bạn là: "{bot_role}".
@@ -135,16 +134,17 @@ def continue_conversation(request):
                         2. Feedback nội dung mới nhất của tôi về cách sử dụng tiếng Anh (ngữ pháp, từ vựng, tự nhiên), gợi ý nội dung chuẩn hơn nếu có thể (bằng tiếng Việt).
                         """
 
-            
             # 6.1.27. Yêu cầu tạo message và feedback cho cuộc hội thoại (prompt)
             # & 6.1.28. Trả về message và feedback
             response = client.models.generate_content(
                 model=GEMINI_MODEL,
-                contents = prompt,
+                contents=prompt,
                 config=genai.types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=RepsonseMessage,
-                ))
+                    response_mime_type="application/json",
+                    response_schema=RepsonseMessage,
+                ),
+            )
+            response = json.loads(response.text)
 
             user_message.feedback = response["feedback"]
             user_message.save()
@@ -162,7 +162,6 @@ def continue_conversation(request):
             return JsonResponse(
                 {"success": False, "message": "Conversation not found"}, status=404
             )
-            
 
 
 @csrf_exempt
