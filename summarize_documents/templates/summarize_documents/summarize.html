@@ -24,18 +24,35 @@
 
 
 {% block content %}
+
+{% include 'components/header.html' %}
+
 <div class="loading-overlay" id="loading-overlay">
     <div class="spinner"></div>
 </div>
 
-<header class="header">
+  <header class="hero">
+    <div class="hero-overlay">
+      <div class="theme-toggle-container">
+        <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+      </div>
+      <div class="hero-content">
+        <h1>Tóm tắc văn bản</h1>
+        <p>Tạo bản tóm tắc ngắn gọn từ tài liệu</p>
+      </div>
+    </div>
+  </header>
+
+{% comment %} <header class="header">
     <h1>Text Summarizer</h1>
     <p>Generate concise summaries from your text</p>
 </header>
 
 <button class="theme-toggle" onclick="toggleTheme()">
     <span class="material-symbols-rounded">light_mode</span>
-</button>
+</button> {% endcomment %}
+
+
 
 <div class="container">
     <div class="input-section">
@@ -75,6 +92,8 @@
         </button>
     </div>
 </div>
+
+{% include 'components/footer.html' %}
 
 {% endblock content %}
     

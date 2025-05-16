@@ -3,51 +3,79 @@
 
         let currentSummaryType = 'short';
 
-        initTheme()
 
-// Theme handling
+
+        // Theme handling
 function toggleTheme() {
-  const body = document.body;
-  const isDark = body.getAttribute("data-theme") === "dark";
-  const newTheme = isDark ? "light" : "dark";
-
-  // Apply transition class for smooth transition
-  body.classList.add("theme-transition");
-
-  // Update theme
-  body.setAttribute("data-theme", newTheme);
-  localStorage.setItem("theme", newTheme);
-
-  // Update icon
-  updateThemeIcon();
-
-  // Remove transition class after transition completes
-  setTimeout(() => {
-    body.classList.remove("theme-transition");
-  }, 500);
-
-  console.log(`Theme changed to: ${newTheme}`);
-}
-
-function updateThemeIcon() {
-  const icon = document.querySelector(".theme-toggle i");
-  if (icon) {
-    const isDark = document.body.getAttribute("data-theme") === "dark";
-    icon.className = isDark ? "fas fa-sun" : "fas fa-moon";
-  } else {
-    console.warn("Theme toggle icon not found");
+    const body = document.body;
+    const isDark = body.getAttribute("data-theme") === "dark";
+    const newTheme = isDark ? "light" : "dark";
+  
+    // Apply transition class for smooth transition
+    body.classList.add("theme-transition");
+  
+    // Update theme
+    body.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+  
+    // Update icon
+    updateThemeIcon();
+  
+    // Remove transition class after transition completes
+    setTimeout(() => {
+      body.classList.remove("theme-transition");
+    }, 500);
+  
+    console.log(`Theme changed to: ${newTheme}`);
   }
-}
+  
+  function updateThemeIcon() {
+    const icon = document.querySelector(".theme-toggle i");
+    if (icon) {
+      const isDark = document.body.getAttribute("data-theme") === "dark";
+      icon.className = isDark ? "fas fa-sun" : "fas fa-moon";
+    } else {
+      console.warn("Theme toggle icon not found");
+    }
+  }
+  
+  // Initialize theme
+  function initTheme() {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    document.body.setAttribute("data-theme", savedTheme);
+    console.log(`Initialized theme: ${savedTheme}`);
+    updateThemeIcon();
+  }
+  
+  // Document ready event
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM loaded, initializing application...");
+  
+    // Initialize theme
+    initTheme();
+  })
 
-// Initialize theme
-function initTheme() {
-  const savedTheme = localStorage.getItem("theme") || "light";
-  document.body.setAttribute("data-theme", savedTheme);
-  console.log(`Initialized theme: ${savedTheme}`);
-  updateThemeIcon();
-}
+        // // Theme handling
+        // function toggleTheme() {
+        //     const body = document.body;
+        //     const isDark = body.getAttribute('data-theme') === 'dark';
+        //     body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        //     localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        //     updateThemeIcon();
+        // }
 
-        // Input method switching
+        // function updateThemeIcon() {
+        //     const icon = document.querySelector('.theme-toggle .material-symbols-rounded');
+        //     const isDark = document.body.getAttribute('data-theme') === 'dark';
+        //     icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+        // }
+
+        // // Load saved theme
+        // const savedTheme = localStorage.getItem('theme') || 'light';
+        // document.body.setAttribute('data-theme', savedTheme);
+        // updateThemeIcon();
+
+        // 4.12 Xử lý nhập liệu
         document.querySelectorAll('.method').forEach(method => {
             method.addEventListener('click', () => {
                 document.querySelectorAll('.method').forEach(m => m.classList.remove('active'));
@@ -59,7 +87,7 @@ function initTheme() {
             });
         });
 
-        // File input handling
+       
         document.getElementById('file-input').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -115,7 +143,7 @@ function initTheme() {
                 }
 
                 formData.append('summaryType', currentSummaryType);
-
+// 4.7.1.2  Request POST/summarize
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     
@@ -126,6 +154,7 @@ function initTheme() {
                 if (!response.ok) throw new Error(data.error || 'Error generating summary');
 
                 const summary = data.summarized_text;
+                // 4.7.2.11. hiẻn thị kết quả
                 document.getElementById('summary-content').textContent = summary;
                 document.querySelector('.input-section').style.display = 'none';
                 document.getElementById('summary-section').style.display = 'block';
