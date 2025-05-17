@@ -5,6 +5,8 @@ const API_KEY = "AIzaSyDFzsQxciE0WYHaXd0968bBMdZIkxZlRp0";
         let questions = [];
         let userAnswers = [];
 
+        let files;
+
         // Theme handling
         function toggleTheme() {
             const body = document.body;
@@ -44,19 +46,24 @@ document.getElementById('file-upload').addEventListener('click', () => {
 });
 
 document.getElementById('document-input').addEventListener('change', async (e) => {
-    const files = e.target.files;
+    files = e.target.files;
     if (!files.length) return;
-
     const fileInfo = document.getElementById('file-info');
-    fileInfo.innerHTML = `Selected: ${files.length} file(s)`;
+    fileInfo.innerHTML = `Selected: ${files[0].name}`;   
+});
 
-    const loading = document.createElement('div');
+
+    // 7.1.7 Chọn file và nhấn tạo quiz
+    // 7.1.16 Nhập text và nhấn tạo quiz
+    async function generateQuiz() {
+    const manualText = document.getElementById('text-input').value.trim();
+    const loading = document.getElementById('file-loading');
     loading.className = 'loading';
-    loading.innerHTML = '<span class="material-symbols-rounded">sync</span> Processing document...';
-    fileInfo.appendChild(loading);
+    loading.innerHTML = '<span class="material-symbols-rounded">sync</span> Đang tạo câu hỏi...';
     loading.style.display = 'block';
 
-    try {
+    // 7.1.8 Request POST kèm file
+     try {
         const formData = new FormData();
         formData.append('file', files[0]);
 
@@ -69,9 +76,6 @@ document.getElementById('document-input').addEventListener('change', async (e) =
 
         const data = await response.json();
         loading.style.display = 'none';
-        fileInfo.innerHTML = `✅ Đã xử lý: ${files[0].name}`;
-
-        // Lưu lại JSON response (chưa hiển thị)
         const jsonMatch = data.data.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error("Không tìm thấy JSON hợp lệ trong phản hồi");
 
@@ -80,41 +84,40 @@ document.getElementById('document-input').addEventListener('change', async (e) =
 
     } catch (error) {
         console.error(error);
-        loading.style.display = 'none';
-        fileInfo.innerHTML = `Lỗi: ${error.message}`;
     }
-});
-
-
-// Manual text quiz generation
-async function generateQuiz() {
-    const manualText = document.getElementById('text-input').value.trim();
 
     if (window.extractedQuestions && window.extractedQuestions.length > 0) {
         questions = window.extractedQuestions;
+        // 7.1.15 Hiển thị câu hỏi
         displayQuiz();
+        loading.style.display = 'none';
         return;
     }
 
     if (!manualText) {
         alert('Hãy nhập văn bản hoặc tải file lên trước.');
+        loading.style.display = 'none';
         return;
     }
-
+        // 7.1.17 Gửi request POST với text
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text: manualText })
         });
-
+        // 7.1.19 Trả về JSON câu hỏi
         const data = await response.json();
+        loading.style.display = 'none';
         const jsonMatch = data.data.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error("Không tìm thấy JSON hợp lệ trong phản hồi");
 
         const parsed = JSON.parse(jsonMatch[0]);
         questions = parsed.questions;
+        // 7.1.21 Hiển thị câu hỏi
         displayQuiz();
+        loading.style.display = 'none';
+
 
     } catch (error) {
         console.error(error);
@@ -132,8 +135,8 @@ function displayQuiz() {
         const questionDiv = document.createElement('div');
         questionDiv.className = 'question';
         questionDiv.innerHTML = `
-            <h3>Question ${index + 1}</h3>
-            <p>${q.question}</p>
+            <h3>Câu ${index + 1}</h3>
+            <p style="margin-bottom: 10px;">${q.question}</p>
             <div class="options-grid">
                 ${q.options.map((opt, i) => `
                     <div class="option-button" data-question="${index}" data-option="${i}">
@@ -148,7 +151,7 @@ function displayQuiz() {
     document.querySelector('.input-section').style.display = 'none';
     document.getElementById('quiz-section').style.display = 'block';
     document.getElementById('result-section').style.display = 'none';
-
+    // 7.1.22 Chọn câu trả lời
     document.querySelectorAll('.option-button').forEach(btn => {
         btn.addEventListener('click', () => {
             const qIndex = parseInt(btn.dataset.question);
@@ -162,44 +165,71 @@ function displayQuiz() {
         });
     });
 }
-
+// 7.1.23 Nhấn nút Hoàn thành
 function submitQuiz() {
-    if (userAnswers.length !== questions.length) {
-        alert('Vui lòng trả lời tất cả các câu hỏi!');
-        return;
-    }
-
     let score = 0;
     questions.forEach((q, index) => {
         const chosen = q.options[userAnswers[index]];
+        // 7.1.24 So sánh đáp án với correctAnswer
         const isCorrect = chosen === q.correctAnswer;
         if (isCorrect) score++;
 
         document.querySelectorAll(`.option-button[data-question="${index}"]`).forEach(btn => {
             const text = btn.textContent.trim();
-            if (text === q.correctAnswer) btn.classList.add('correct');
-            else if (text === chosen) btn.classList.add('incorrect');
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+
+            if (text === q.correctAnswer) newBtn.classList.add('correct');
+            else if (text === chosen) newBtn.classList.add('incorrect');
         });
     });
-
+    // 7.1.25 Hiển thị điểm và đáp án
     const percentage = Math.round(score / questions.length * 100);
-    document.getElementById('score').textContent = `Score: ${percentage}%`;
+    document.getElementById('score').textContent = `Điểm: ${percentage}%`;
     document.getElementById('result-section').style.display = 'block';
-}
+    document.getElementById('submit-button').style.display = 'none';
 
-function resetQuiz() {
-    document.getElementById('text-input').value = '';
-    document.querySelector('.input-section').style.display = 'block';
-    document.getElementById('quiz-section').style.display = 'none';
+}
+ // 7.1.27 Gọi lại API tạo quiz
+async function resetQuiz() {
+    document.getElementById('questions-container').innerHTML = '';
     document.getElementById('result-section').style.display = 'none';
     questions = [];
     userAnswers = [];
-    window.extractedQuestions = null; // reset biến tạm
+    window.extractedQuestions = null;
+
+    const loading = document.getElementById('reset-loading');
+    loading.className = 'loading';
+    loading.innerHTML = '<span class="material-symbols-rounded">sync</span> Đang tạo câu hỏi...';
+    loading.style.display = 'block';
+    await generateQuiz();
+    loading.style.display = 'none';
+     document.getElementById('submit-button').style.display = 'flex';
+    window.scrollTo(0, 0);
 }
 
 
-        function resetSummary() {
-            document.getElementById('text-input').value = '';
-            document.querySelector('.input-section').style.display = 'block';
-            document.getElementById('summary-section').style.display = 'none';
-        }
+function resetText() {
+    // Reset text input
+    document.getElementById('text-input').value = '';
+    // Show upload section
+    document.querySelector('.input-section').style.display = 'block';
+    // Hide all other sections
+    document.getElementById('quiz-section').style.display = 'none';
+    document.getElementById('result-section').style.display = 'none';
+    document.getElementById('summary-section').style.display = 'none';
+    // Clear quiz content
+    document.getElementById('questions-container').innerHTML = '';
+    document.getElementById('score').innerHTML = '';
+    document.getElementById('summary-content').innerHTML = '';
+    // Reset file input and file info
+    document.getElementById('document-input').value = '';
+    document.getElementById('file-info').innerHTML = '';
+    // Clear variables
+    window.questions = [];
+    window.userAnswers = [];
+    window.extractedQuestions = null;
+    window.scrollTo(0, 0);
+}
+
+        

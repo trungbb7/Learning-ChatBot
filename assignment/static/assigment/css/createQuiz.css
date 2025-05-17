@@ -315,7 +315,7 @@
         }
 
         .loading .material-symbols-rounded {
-            animation: spin 1s linear infinite;
+          animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
@@ -444,6 +444,10 @@
             color: white;
             border-color: var(--error-color);
         }
+        .button-section{
+          display: flex;
+          justify-content: space-around;
+        }
 
         .result-section {
             display: none;
@@ -499,7 +503,7 @@
             display: flex;
             gap: 10px;
             margin-top: 15px;
-            justify-content: center;
+            justify-content: space-around;
         }
 
         .secondary-button {

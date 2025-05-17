@@ -50,34 +50,35 @@ href="{% static 'assigment/css/createQuiz.css' %}" />
         <div class="button-group">
             <button onclick="generateQuiz()">
                 <span class="material-symbols-rounded">quiz</span>
-                Generate Quiz
+                Tạo câu hỏi
         </div>
+        <div id="file-loading"></div>
     </div>
 
     <div class="quiz-section" id="quiz-section">
         <div id="questions-container"></div>
-        <button onclick="submitQuiz()" id="submit-button">
+         <div id="reset-loading"></div>
+        <div class="button-section">
+            <button onclick="submitQuiz()" id="submit-button">
             <span class="material-symbols-rounded">check_circle</span>
-            Submit Quiz
+            Hoàn thành
+            {% comment %}7.1.26 Nhấn Câu hỏi khác {% endcomment %}
         </button>
+        <button onclick="resetQuiz()">
+            <span class="material-symbols-rounded">refresh</span>
+            Câu hỏi khác
+        </button>
+        {% comment %} Chọn tài liệu khác {% endcomment %}
+        <button onclick="resetText()">
+                <span class="material-symbols-rounded">quiz</span>
+                Tài liệu khác
+        </button>
+        </div>
     </div>
 
     <div class="result-section" id="result-section">
-        <h2>Quiz Results</h2>
+        <h2>Kết quả</h2>
         <div class="score" id="score"></div>
-        <button onclick="resetQuiz()">
-            <span class="material-symbols-rounded">refresh</span>
-            Try Another Quiz
-        </button>
-    </div>
-
-    <div class="summary-section" id="summary-section" style="display: none;">
-        <h2>Text Summary</h2>
-        <div class="summary-content" id="summary-content"></div>
-        <button onclick="resetSummary()">
-            <span class="material-symbols-rounded">refresh</span>
-            Try Another Text
-        </button>
     </div>
 </div>
 <!-- Footer -->

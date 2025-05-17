@@ -15,23 +15,28 @@ GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 GEMINI_MODEL = os.getenv('GEMINI_MODEL')
 
 client = genai.Client(api_key=GEMINI_API_KEY)
-
 def create_quiz(request):
-    return render(request, 'assigment/createQuiz.html')
+    # 7.1.3 Gọi hàm render cho template "Tạo bài tập từ tài liệu".
+    # 7.1.4 Trả về template đã được render
+    template =  render(request, 'assigment/createQuiz.html')
+    # 7.1.5 Response trang html "Tạo bài tập từ tài liệu"
+    return template
 
 @csrf_exempt
 def create_quiz_api(request):
     if request.method == 'POST' and request.FILES.get('file'):
+        # 7.1.9 Lấy dữ liệu từ request
         uploaded_file = request.FILES['file']
         filename = uploaded_file.name
         ext = os.path.splitext(filename)[1].lower()
 
-        # Lưu file tạm
+        # 7.1.10 Lưu file tạm
         path = default_storage.save('tmp/' + filename, uploaded_file)
         full_path = default_storage.path(path)
+        print("Đã lưu file tại:", full_path)
 
+        # 7.1.11 extract_text(full_path)
         try:
-            # Trích xuất text từ file
             if ext == '.pdf':
                 text = extract_text_from_pdf(full_path)
             elif ext == '.docx':
@@ -41,9 +46,9 @@ def create_quiz_api(request):
             else:
                 return JsonResponse({'error': 'File không được hỗ trợ.'}, status=400)
 
-            # Prompt yêu cầu tạo câu hỏi trắc nghiệm
+        # Chuẩn bị prompt
             prompt = f"""
-Tạo 5 câu hỏi trắc nghiệm dựa trên văn bản sau, mỗi câu có 4 lựa chọn và một đáp án đúng. Trả về kết quả dưới dạng JSON như sau:
+Tạo 10 câu hỏi trắc nghiệm dựa trên văn bản sau, mỗi câu có 4 lựa chọn và một đáp án đúng. Trả về kết quả dưới dạng JSON như sau:
 {{
     "questions": [
         {{
@@ -57,12 +62,13 @@ Tạo 5 câu hỏi trắc nghiệm dựa trên văn bản sau, mỗi câu có 4 
 
 Văn bản: {text}
 """
-
+            # 7.1.12 Gửi prompt tạo câu hỏi với text trích xuất
+            # 7.1.13 Trả về JSON câu hỏi
             response = client.models.generate_content(
                 model=GEMINI_MODEL,
                 contents=prompt,
             )
-            
+            # 7.1.14 Response {data}
             return JsonResponse({'data': response.text})
 
         except Exception as e:
@@ -72,11 +78,12 @@ Văn bản: {text}
                 os.remove(full_path)
 
     elif request.method == 'POST':
+         # 7.1.18 Gửi prompt tạo câu hỏi với text
         body = json.loads(request.body)
         text = body.get('text')
 
         prompt = f"""
-Tạo 5 câu hỏi trắc nghiệm dựa trên văn bản sau, mỗi câu có 4 lựa chọn và một đáp án đúng. Trả về kết quả dưới dạng JSON như sau:
+Tạo 10 câu hỏi trắc nghiệm dựa trên văn bản sau, mỗi câu có 4 lựa chọn và một đáp án đúng. Trả về kết quả dưới dạng JSON như sau:
 {{
     "questions": [
         {{
@@ -94,7 +101,7 @@ Văn bản: {text}
             model=GEMINI_MODEL,
             contents=prompt,
         )
-        
+        # 7.1.20 Trả về JSON câu hỏi
         return JsonResponse({'data': response.text})
 
     else:
