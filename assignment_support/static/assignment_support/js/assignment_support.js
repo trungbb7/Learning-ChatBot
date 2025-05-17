@@ -1,7 +1,6 @@
-        // const API_KEY = "AIzaSyDFzsQxciE0WYHaXd0968bBMdZIkxZlRp0";
-        // const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+        
 
-        let currentSubject = 'math';
+        let currentSubject = 'Toán học';
         let currentHintNumber = 1;
         let hints = [];
         let solution = '';
@@ -35,11 +34,6 @@
             return text;
         }
 
-        // function updateThemeIcon() {
-        //     const icon = document.querySelector('.theme-toggle-as .material-symbols-rounded');
-        //     const isDark = document.body.getAttribute('data-theme') === 'dark';
-        //     icon.textContent = isDark ? 'light_mode' : 'dark_mode';
-        // }
         function updateThemeIcon() {
             const icon = document.querySelector('.theme-toggle-as .material-symbols-rounded');
             const isDark = document.body.getAttribute('data-theme') === 'dark';
@@ -54,7 +48,9 @@
         document.body.setAttribute('data-theme', savedTheme);
         updateThemeIcon();
 
+        
         // Subject selection
+        // 5.1.7: Người dùng chọn môn học (Toán, Lý, Hóa, Lập trình)
         document.querySelectorAll('.subject-button-as').forEach(button => {
             button.addEventListener('click', () => {
                 document.querySelectorAll('.subject-button-as').forEach(btn => btn.classList.remove('active'));
@@ -99,7 +95,7 @@
                 handleImage(file);
             }
         });
-
+        // Image upload xử lý:
         imageInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -124,6 +120,7 @@
             imageUploadArea.querySelector('.upload-placeholder-as').style.display = 'flex';
         }
 
+        // 5.1.8: Người dùng nhập bài tập dạng văn bản hoặc tải hình ảnh
         // LaTeX preview
         document.getElementById('input-text-as').addEventListener('input', () => {
             const text = document.getElementById('input-text-as').value;
@@ -133,7 +130,9 @@
                 MathJax.typesetPromise([preview]);
             }
         });
-
+        // 5.1.9: Người dùng chọn chế độ "Xem gợi ý" hoặc "Giải bài tập"
+        // 5.1.1010: Trình duyệt gửi POST request với nội dung bài tập, hình ảnh, môn học, chế độ
+        // xem gợi ý
         // Get hint
         async function getHint() {
             const inputMethod = document.querySelector('.input-method-button-as.active').dataset.method;
@@ -173,14 +172,16 @@
             hintContainer.style.display = 'none';
 
             try {
-                const response = await fetch('/handle_text', {
+                const response = await fetch('/suggest', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        text: inputText
+                        text: inputText,
+                        subject : currentSubject
                     })
                 });
-
+                
+                // 5.1.144: Django view trả về JSON chứa kết quả
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error.message);
 
@@ -191,13 +192,15 @@
                 currentHintNumber = 1;
                 showCurrentHint();
             } catch (error) {
+                // 5.2.1: Tạo phản hồi lỗi khi không kết nối
                 hintContent.innerHTML = `<p class="error-message-as">Lỗi: ${error.message}</p>`;
             } finally {
                 loading.style.display = 'none';
                 hintContainer.style.display = 'block';
             }
         }
-
+        // 5.1.15: Trình duyệt hiển thị gợi ý / lời giải
+        // hiển thị gợi ý
         function showCurrentHint() {
             const hintContent = document.getElementById('hint-content-as');
             const hintNumber = document.getElementById('hint-number-as');
@@ -226,7 +229,9 @@
                 showCurrentHint();
             }
         }
-
+        // 5.1.9: Người dùng chọn chế độ "Xem gợi ý" hoặc "Giải bài tập"
+        // 5.1.10: Trình duyệt gửi POST request với nội dung bài tập, hình ảnh, môn học, chế độ
+        // giải bài tập
         async function solveExercise() {
             const inputText = document.getElementById('input-text-as').value.trim();
             if (!inputText) {
@@ -246,30 +251,36 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        text : inputText
+                        text : inputText,
+                        subject : currentSubject
                     })
                 });
-
+                // 5.1.14: Django view trả về JSON chứa kết quả
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error.message);
 
                 solution = data.hints;
 
                 console.log(`solution: ${solution}`);
-
+                // 5.1.15: Trình duyệt hiển thị gợi ý / lời giải
+                // hiển thị lời giải
                 hintContent.innerHTML = preserveLaTeX(solution);
                 if (MathJax.typesetPromise) {
                     MathJax.typesetPromise([hintContent]);
                 }
                 document.getElementById('hint-number-as').textContent = 'Giải';
             } catch (error) {
+                // 5.2.1: Tạo phản hồi lỗi khi không kết nối
                 hintContent.innerHTML = `<p class="error-message-as">Lỗi: ${error.message}</p>`;
             } finally {
                 loading.style.display = 'none';
                 hintContainer.style.display = 'block';
             }
         }
-
+        
+        // 5.1.11: Nếu là ảnh, hệ thống xử lý để trích xuất nội dung
+        // 5.1.12: Tạo prompt phù hợp gửi đến Gemini API
+        // 5.1.13: Gemini API trả về kết quả    
         async function convertImageToText(imageFile) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -279,7 +290,7 @@
                         const base64Image = e.target.result.split(',')[1];
 
                         // Gọi Gemini API với hình ảnh
-                        const response = await fetch('/handle_exercise_image', {
+                        const response = await fetch('/suggest', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -288,7 +299,7 @@
                                 data: base64Image
                             })
                         });
-
+                        // 5.1.14: Django view trả về JSON chứa kết quả
                         const data = await response.json();
                         if (!response.ok) {
                             throw new Error(data.error?.message || 'Lỗi khi xử lý hình ảnh');
@@ -309,7 +320,7 @@
                 reader.readAsDataURL(imageFile);
             });
         }
-
+        // 5.1.16. Người dùng có thể tiếp tục với bài khác hoặc kết thúc phiên làm việc.
         function clearText() {
             document.getElementById('input-text-as').value = '';
             document.getElementById('hint-container-as').style.display = 'none';
