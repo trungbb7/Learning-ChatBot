@@ -66,7 +66,15 @@ async function sendMessage() {
   }
 
   const text = userInput.value.trim();
-  if (!text) return;
+  if (!text) {
+    alert("Vui lòng nhập tin nhắn!");
+    return;
+  }
+
+  if (text.length > 1000) {
+    alert("Tin nhắn quá dài!");
+    return;
+  }
 
   // Disable input while processing
   userInput.disabled = true;
