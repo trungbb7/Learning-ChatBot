@@ -443,8 +443,8 @@ body {
   box-shadow: 0 2px 5px var(--shadow-color);
   padding: 1.5rem;
   height: calc(100vh - 300px);
-  position: sticky;
-  top: 2rem;
+  /* position: sticky;
+  top: 2rem; */
   transition: background-color 0.3s, box-shadow 0.3s;
 }
 
