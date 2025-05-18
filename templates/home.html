@@ -43,7 +43,10 @@
             <h3>Tóm tắt văn bản</h3>
             <p>Tự động tóm tắt các tài liệu dài thành nội dung ngắn gọn, giúp bạn nắm bắt thông tin nhanh chóng.</p>
           </div>
-          <a href="#" class="feature-link">Bắt đầu</a>
+            {% comment %} 4.1 . Chọn chức năng "Tóm tắt văn bản" ở trang chủ
+            4.2. Request GET /summarize    {% endcomment %}
+          <a href="{% url 'summarize' %}" class="feature-link">Bắt đầu</a>
+         
         </div>
 
         <div class="feature-item feature-animate">
