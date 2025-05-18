@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "summarize_documents",
     "demo",
     "auths",
+    "assignment_support",
     "english_conversation",
     "corsheaders",
     "django.contrib.admin",
@@ -56,6 +57,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "assignment"
 ]
 
 MIDDLEWARE = [

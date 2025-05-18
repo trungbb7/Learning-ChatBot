@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+
+{% block title %}
+Trợ lý giải bài tập
+{% endblock title %}
+
+{% block css_files %}
+   <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-light.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-dark.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+     
+    <link rel="stylesheet"
+        href="{% static 'assignment_support/css/assignment_support.css' %}">  
+        <link rel="stylesheet" href="{% static 'english_conversation/css/english_conversation.css' %}" />     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" /> 
+    
+{% endblock css_files %}
+
+{% block js_files %}
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script id="MathJax-script" async src="{% static 'assignment_support/js/assignment_support.js' %}"></script>
+{% endblock js_files %}
+{% block content %}
+    {% include 'components/header.html' %}
+    <!-- <header class="header-as">
+        <h1>Trợ lý giải bài tập</h1>
+        <p>Hỗ trợ giải bài tập từng bước một, giúp bạn hiểu sâu hơn về vấn đề</p>
+    </header> -->
+
+    <!-- <button class="theme-toggle-as" onclick="toggleTheme()">
+        <span class="material-symbols-rounded">light_mode</span>
+    </button> -->
+<!--  -->
+    <header class="hero">
+        <div class="hero-overlay">
+        <div class="theme-toggle-container">
+            <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+        </div>
+        <div class="hero-content">
+            <h1>Trợ lý giải bài tập</h1>
+            <p>Hỗ trợ giải bài tập từng bước một, giúp bạn hiểu sâu hơn về vấn đề</p>
+        </div>
+        </div>
+    </header>
+
+
+
+<!--  -->
+
+
+    
+    <div class="container-as">
+        <div class="subject-selector-as">
+            {% comment %} 5.1.7. Người dùng chọn môn học. {% endcomment %}
+            <button class="subject-button-as" data-subject="Toán học">
+                <span class="material-symbols-rounded">calculate</span>
+                Toán học
+            </button>
+            <button class="subject-button-as" data-subject="Vật lý">
+                <span class="material-symbols-rounded">science</span>
+                Vật lý
+            </button>
+            <button class="subject-button-as" data-subject="Hóa học">
+                <span class="material-symbols-rounded">biotech</span>
+                Hóa học
+            </button>
+            <button class="subject-button-as" data-subject="Lập trình">
+                <span class="material-symbols-rounded">code</span>
+                Lập trình
+            </button>
+        </div>
+
+        <div class="input-area-as">
+            <div class="input-method-selector-as">
+                <button class="input-method-button-as active" data-method="text">
+                    <span class="material-symbols-rounded">text_fields</span>
+                    Nhập văn bản
+                </button>
+                <button class="input-method-button-as" data-method="image">
+                    <span class="material-symbols-rounded">image</span>
+                    Tải lên hình ảnh
+                </button>
+            </div>
+
+            <div id="text-input-container-as">
+                {% comment %} 5.1.8. Người dùng nhập bài tập dạng văn bản hoặc
+tải hình ảnh bài tập. {% endcomment %}
+                <textarea id="input-text-as"
+                    placeholder="Nhập đề bài cần giải (có thể sử dụng LaTeX cho công thức toán học)..."></textarea>
+                <div class="latex-preview-as" id="latex-preview-as"></div>
+            </div>
+
+            <div id="image-input-container-as" style="display: none;">
+                <div class="image-upload-area-as" id="image-upload-area-as">
+                    {% comment %} 5.1.8. Người dùng nhập bài tập dạng văn bản hoặc
+tải hình ảnh bài tập. {% endcomment %}
+                    <input type="file" id="image-input-as" accept="image/*" style="display: none;">
+                    <div class="upload-placeholder-as">
+                        <span class="material-symbols-rounded">cloud_upload</span>
+                        <p>Kéo thả hình ảnh vào đây hoặc nhấp để chọn</p>
+                    </div>
+                    <div class="image-preview-as" id="image-preview-as" style="display: none;">
+                        <img id="preview-image-as" src="" alt="Preview">
+                        <button class="remove-image-as" onclick="removeImage()">
+                            <span class="material-symbols-rounded">close</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group-as">
+                <button onclick="getHint()">
+                    {% comment %} 5.1.9. Người dùng chọn chế độ:"Xem gợi ý". {% endcomment %}
+                    <span class="material-symbols-rounded">lightbulb</span>
+                    Xem gợi ý
+                </button>
+                <button class="secondary" onclick="clearText()">
+                    <span class="material-symbols-rounded">delete</span>
+                    Xóa
+                </button>
+            </div>
+        </div>
+
+        <div class="loading-container-as" id="loading-as">
+            <div class="loading-spinner-as"></div>
+            <div class="loading-text-as">Đang phân tích đề bài...</div>
+        </div>
+
+        <div class="hint-container-as" id="hint-container-as" style="display: none;">
+            <div class="hint-header-as">
+                <div class="hint-number-as">Gợi ý #<span id="hint-number-as">1</span></div>
+                <div class="hint-buttons-as">
+                    <button class="prev-hint-button-as" onclick="getPrevHint()">
+                        <span class="material-symbols-rounded">arrow_back</span>
+                        Quay lại
+                    </button>
+                    <button class="next-hint-button-as" onclick="getNextHint()">
+                        <span class="material-symbols-rounded">arrow_forward</span>
+                        Gợi ý tiếp theo
+                    </button>
+                    <button class="solve-button-as" onclick="solveExercise()">
+                        <span class="material-symbols-rounded">check_circle</span>
+                        Giải bài tập
+                    </button>
+                </div>
+            </div>
+            <div class="hint-content-as" id="hint-content-as"></div>
+        </div>
+
+        <div class="guide-as">
+            <h3>Hướng dẫn sử dụng:</h3>
+            <ul>
+                <li>Chọn môn học cần giải bài tập</li>
+                <li>Nhập đề bài vào ô nhập liệu (có thể sử dụng LaTeX cho công thức)</li>
+                <li>Nhấn nút "Xem gợi ý" để nhận gợi ý từng bước</li>
+                <li>Nhấn "Gợi ý tiếp theo" để xem các bước tiếp theo</li>
+                <li>Nhấn nút "Xóa" để bắt đầu lại với đề bài mới</li>
+            </ul>
+        </div>
+    </div>
+    <!-- Footer -->
+  {% include 'components/footer.html' %}
+
+{% endblock content %}
+
+
+
+
+
+
+
+
+
