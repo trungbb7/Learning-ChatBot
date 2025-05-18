@@ -43,7 +43,10 @@
             <h3>Tóm tắt văn bản</h3>
             <p>Tự động tóm tắt các tài liệu dài thành nội dung ngắn gọn, giúp bạn nắm bắt thông tin nhanh chóng.</p>
           </div>
-          <a href="#" class="feature-link">Bắt đầu</a>
+            {% comment %} 4.1 . Chọn chức năng "Tóm tắt văn bản" ở trang chủ
+            4.2. Request GET /summarize    {% endcomment %}
+          <a href="{% url 'summarize' %}" class="feature-link">Bắt đầu</a>
+         
         </div>
 
         <div class="feature-item feature-animate">
@@ -54,9 +57,12 @@
             <h3>Giả lập hội thoại tiếng Anh</h3>
             <p>Luyện tập giao tiếp tiếng Anh với AI, cải thiện kỹ năng nói và phản xạ ngôn ngữ.</p>
           </div>
+          {% comment %}6.1.1. Chọn chức năng "Giả lập hội thoại giao tiếp tiếng Anh" ở trang chủ & 6.1.2. Request GET /english-conversation{% endcomment %}
           <a href="{% url 'english-conversation' %}" class="feature-link">Bắt đầu</a>
         </div>
-
+        {% comment %} 7.1.1 Chọn chức năng "Tạo bài tập từ tài liệu" ở trang chủ {% endcomment %} 
+        {% comment %} 7.1.2 Request GET /create-quiz {% endcomment %}
+   
         <div class="feature-item feature-animate">
           <div class="body-group">
             <div class="feature-icon">
@@ -73,9 +79,12 @@
             <div class="feature-icon">
               <i class="fas fa-lightbulb"></i>
             </div>
+
             <h3>Trợ lý giải bài tập</h3>
             <p>Nhận hướng dẫn và giải thích chi tiết cho các bài tập khó.</p>
           </div>
+          {% comment %} 5.1.1 Chọn chức năng "Trợ lí giải bài tập" {% endcomment %}
+          {% comment %} 5.1.2. Request GET /assignment_support {% endcomment %}
           <a href="{% url 'assignment_support' %}" class="feature-link">Bắt đầu</a>
         </div>
       </div>

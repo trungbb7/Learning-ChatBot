@@ -1,90 +1,79 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
 {% block title %}
-Text Quiz Generator
-{% endblock title %}
-
+  Text Quiz Generator
+{% endblock %}
 
 {% block css_files %}
-<link rel="stylesheet"
-href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
 
-<link rel="stylesheet"
-href="{% static 'assigment/css/createQuiz.css' %}" />
-{% endblock css_files %}
-
+  <link rel="stylesheet" href="{% static 'assigment/css/createQuiz.css' %}" />
+{% endblock %}
 
 {% block js_files %}
-<script src="{% static 'assigment/js/createQuiz.js' %}"></script>
-{% endblock js_files %}
-
-
+  <script src="{% static 'assigment/js/createQuiz.js' %}"></script>
+{% endblock %}
 
 {% block content %}
-<!-- Navigation Bar -->
-{% include 'components/header.html' %}
+  <!-- Navigation Bar -->
+  {% include 'components/header.html' %}
 
-<header class="hero">
-  <div class="hero-overlay">
-    <div class="theme-toggle-container">
-      <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+  <header class="hero">
+    <div class="hero-overlay">
+      <div class="theme-toggle-container">
+        <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+      </div>
+      <div class="hero-content">
+        <h1>Tạo bài tập trắc nghiệm từ tài liệu</h1>
+        <p>Kiểm tra trình độ thông qua các bài tập trắc nghiệm</p>
+      </div>
     </div>
-    <div class="hero-content">
-      <h1>Tạo bài tập trắc nghiệm từ tài liệu</h1>
-      <p>Kiểm tra trình độ thông qua các bài tập trắc nghiệm</p>
-    </div>
-  </div>
-</header>
+  </header>
 
-<div class="container">
+  <div class="container">
     <div class="input-section">
-        <div class="file-upload" id="file-upload">
-            <span class="material-symbols-rounded">upload_file</span>
-            <p>Click to upload PDF, DOCX, or other documents</p>
-            <input type="file" id="document-input" accept=".pdf,.docx,.doc,.txt" multiple>
-            <div class="file-info" id="file-info"></div>
-        </div>
-        <textarea id="text-input" placeholder="Or paste your text here..."></textarea>
-        <div class="button-group">
-            <button onclick="generateQuiz()">
-                <span class="material-symbols-rounded">quiz</span>
-                Generate Quiz
-        </div>
+      <div class="file-upload" id="file-upload">
+        <span class="material-symbols-rounded">upload_file</span>
+        <p>Nhấp vào đây để tải tài liệu (hỗ trợ .txt, .pdf, .docx)</p>
+        <input type="file" id="document-input" accept=".pdf,.docx,.doc,.txt" multiple />
+        <div class="file-info" id="file-info"></div>
+      </div>
+      <textarea id="text-input" placeholder="Hoặc nhập văn bản tại đây"></textarea>
+      <div class="button-group">
+        <button onclick="generateQuiz()">
+          <span class="material-symbols-rounded">quiz</span>
+          Tạo câu hỏi
+        </button>
+      </div>
+      <div id="file-loading"></div>
     </div>
 
     <div class="quiz-section" id="quiz-section">
-        <div id="questions-container"></div>
+      <div id="questions-container"></div>
+      <div id="reset-loading"></div>
+      <div class="button-section">
         <button onclick="submitQuiz()" id="submit-button">
-            <span class="material-symbols-rounded">check_circle</span>
-            Submit Quiz
+          <span class="material-symbols-rounded">check_circle</span>
+          Hoàn thành{% comment %}7.1.26 Nhấn Câu hỏi khác{% endcomment %}
         </button>
+        <button onclick="resetQuiz()">
+          <span class="material-symbols-rounded">refresh</span>
+          Câu hỏi khác
+        </button>
+        {% comment %}Chọn tài liệu khác{% endcomment %}
+        <button onclick="resetText()">
+          <span class="material-symbols-rounded">quiz</span>
+          Tài liệu khác
+        </button>
+      </div>
     </div>
 
     <div class="result-section" id="result-section">
-        <h2>Quiz Results</h2>
-        <div class="score" id="score"></div>
-        <button onclick="resetQuiz()">
-            <span class="material-symbols-rounded">refresh</span>
-            Try Another Quiz
-        </button>
+      <h2>Kết quả</h2>
+      <div class="score" id="score"></div>
     </div>
-
-    <div class="summary-section" id="summary-section" style="display: none;">
-        <h2>Text Summary</h2>
-        <div class="summary-content" id="summary-content"></div>
-        <button onclick="resetSummary()">
-            <span class="material-symbols-rounded">refresh</span>
-            Try Another Text
-        </button>
-    </div>
-</div>
-<!-- Footer -->
-{% include 'components/footer.html' %}
-{% endblock content %}
-    
-    
-
-
-
+  </div>
+  <!-- Footer -->
+  {% include 'components/footer.html' %}
+{% endblock %}
