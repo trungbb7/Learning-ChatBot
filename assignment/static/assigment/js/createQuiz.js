@@ -1,9 +1,11 @@
 const API_KEY = "AIzaSyDFzsQxciE0WYHaXd0968bBMdZIkxZlRp0";
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+        const API_URL = "/create-quiz-api/";
 
         let currentQuizType = 'multiple-choice';
         let questions = [];
         let userAnswers = [];
+
+        let files;
 
         // Theme handling
         function toggleTheme() {
@@ -38,214 +40,196 @@ const API_KEY = "AIzaSyDFzsQxciE0WYHaXd0968bBMdZIkxZlRp0";
             });
         });
 
-        // File upload handling
-        document.getElementById('file-upload').addEventListener('click', () => {
-            document.getElementById('document-input').click();
+        /// File upload
+document.getElementById('file-upload').addEventListener('click', () => {
+    document.getElementById('document-input').click();
+});
+
+document.getElementById('document-input').addEventListener('change', async (e) => {
+    files = e.target.files;
+    if (!files.length) return;
+    const fileInfo = document.getElementById('file-info');
+    fileInfo.innerHTML = `Selected: ${files[0].name}`;   
+});
+
+
+    // 7.1.7 Chọn file và nhấn tạo quiz
+    // 7.1.16 Nhập text và nhấn tạo quiz
+    async function generateQuiz() {
+    const manualText = document.getElementById('text-input').value.trim();
+    const loading = document.getElementById('file-loading');
+    loading.className = 'loading';
+    loading.innerHTML = '<span class="material-symbols-rounded">sync</span> Đang tạo câu hỏi...';
+    loading.style.display = 'block';
+
+    // 7.1.8 Request POST kèm file
+     try {
+        const formData = new FormData();
+        formData.append('file', files[0]);
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: formData
         });
 
-        document.getElementById('document-input').addEventListener('change', async (e) => {
-            const files = e.target.files;
-            if (!files.length) return;
+        if (!response.ok) throw new Error('Lỗi khi gửi file lên server');
 
-            const fileInfo = document.getElementById('file-info');
-            fileInfo.innerHTML = `Selected: ${files.length} file(s)`;
+        const data = await response.json();
+        loading.style.display = 'none';
+        const jsonMatch = data.data.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("Không tìm thấy JSON hợp lệ trong phản hồi");
 
-            // Show loading indicator
-            const loading = document.createElement('div');
-            loading.className = 'loading';
-            loading.innerHTML = '<span class="material-symbols-rounded">sync</span> Processing document...';
-            fileInfo.appendChild(loading);
-            loading.style.display = 'block';
+        const parsed = JSON.parse(jsonMatch[0]);
+        window.extractedQuestions = parsed.questions;
 
-            try {
-                let extractedText = '';
-                // For PDF files
-                if (files[0].name.endsWith('.pdf')) {
-                    const formData = new FormData();
-                    formData.append('file', files[0]);
+    } catch (error) {
+        console.error(error);
+    }
 
-                    const response = await fetch('/api/process-pdf', {
-                        method: 'POST',
-                        body: formData
-                    });
+    if (window.extractedQuestions && window.extractedQuestions.length > 0) {
+        questions = window.extractedQuestions;
+        // 7.1.15 Hiển thị câu hỏi
+        displayQuiz();
+        loading.style.display = 'none';
+        return;
+    }
 
-                    if (!response.ok) throw new Error('Failed to process PDF');
-                    extractedText = await response.text();
-                }
-                // For DOCX files
-                else if (files[0].name.endsWith('.docx')) {
-                    const formData = new FormData();
-                    formData.append('file', files[0]);
-
-                    const response = await fetch('/api/process-docx', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    if (!response.ok) throw new Error('Failed to process DOCX');
-                    extractedText = await response.text();
-                }
-                // For TXT files
-                else if (files[0].name.endsWith('.txt')) {
-                    extractedText = await files[0].text();
-                }
-                else {
-                    throw new Error('Unsupported file format');
-                }
-
-                // Store the extracted text in a hidden variable
-                window.extractedText = extractedText;
-                
-                loading.style.display = 'none';
-                fileInfo.innerHTML = `Successfully processed: ${files[0].name}`;
-                
-                // Automatically generate quiz for uploaded files
-                await generateQuiz();
-            } catch (error) {
-                console.error('Error:', error);
-                loading.style.display = 'none';
-                fileInfo.innerHTML = `Error: ${error.message}`;
-            }
+    if (!manualText) {
+        alert('Hãy nhập văn bản hoặc tải file lên trước.');
+        loading.style.display = 'none';
+        return;
+    }
+        // 7.1.17 Gửi request POST với text
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: manualText })
         });
+        // 7.1.19 Trả về JSON câu hỏi
+        const data = await response.json();
+        loading.style.display = 'none';
+        const jsonMatch = data.data.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("Không tìm thấy JSON hợp lệ trong phản hồi");
 
-        async function generateQuiz() {
-            const text = window.extractedText || document.getElementById('text-input').value.trim();
-            if (!text) {
-                alert('Please upload a document or enter some text first!');
-                return;
-            }
+        const parsed = JSON.parse(jsonMatch[0]);
+        questions = parsed.questions;
+        // 7.1.21 Hiển thị câu hỏi
+        displayQuiz();
+        loading.style.display = 'none';
 
-            try {
-                const response = await fetch("/api/create-quiz", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        currentQuizType: currentQuizType,
-                        text: text
-                    })
-                    // body: JSON.stringify({
-                    //     contents: [{
-                    //         role: 'user',
-                    //         parts: [{
-                    //             text: `Generate a ${currentQuizType} quiz based on the following text. Create 5 questions with 4 options each (for multiple choice) or true/false options. Format the response as JSON:
-                    //             {
-                    //                 "questions": [
-                    //                     {
-                    //                         "question": "question text",
-                    //                         "options": ["option1", "option2", "option3", "option4"],
-                    //                         "correctAnswer": "correct option"
-                    //                     }
-                    //                 ]
-                    //             }
-                                
-                    //             Text: ${text}`
-                    //         }]
-                    //     }]
-                    // })
-                });
-        
-                const responseData = await response.json();
-                const responseText = responseData.data
-                // if (!response.ok) throw new Error(data.error.message);
-        
-                // // Extract JSON from the response text
-                // const responseText = data.candidates[0].content.parts[0].text;
-        
-                const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-                if (!jsonMatch) {
-                    throw new Error('No valid JSON found in response');
-                }
-        
-                questions = JSON.parse(jsonMatch[0]).questions;
-                displayQuiz();
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error generating quiz. Please try again.');
-            }
-        }
 
-        function displayQuiz() {
-            const container = document.getElementById('questions-container');
-            container.innerHTML = '';
-            userAnswers = [];
+    } catch (error) {
+        console.error(error);
+        alert("Lỗi khi tạo câu hỏi: " + error.message);
+    }
+}
 
-            questions.forEach((q, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.className = 'question';
-                questionDiv.innerHTML = `
-                    <h3>Question ${index + 1}</h3>
-                    <p>${q.question}</p>
-                    <div class="options-grid">
-                        ${q.options.map((option, optIndex) => `
-                            <div class="option-button" data-question="${index}" data-option="${optIndex}">
-                                ${option}
-                            </div>
-                        `).join('')}
+
+function displayQuiz() {
+    const container = document.getElementById('questions-container');
+    container.innerHTML = '';
+    userAnswers = [];
+
+    questions.forEach((q, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question';
+        questionDiv.innerHTML = `
+            <h3>Câu ${index + 1}</h3>
+            <p style="margin-bottom: 10px;">${q.question}</p>
+            <div class="options-grid">
+                ${q.options.map((opt, i) => `
+                    <div class="option-button" data-question="${index}" data-option="${i}">
+                        ${opt}
                     </div>
-                `;
-                container.appendChild(questionDiv);
-            });
+                `).join('')}
+            </div>
+        `;
+        container.appendChild(questionDiv);
+    });
 
-            document.querySelector('.input-section').style.display = 'none';
-            document.getElementById('quiz-section').style.display = 'block';
-            document.getElementById('result-section').style.display = 'none';
+    document.querySelector('.input-section').style.display = 'none';
+    document.getElementById('quiz-section').style.display = 'block';
+    document.getElementById('result-section').style.display = 'none';
+    // 7.1.22 Chọn câu trả lời
+    document.querySelectorAll('.option-button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const qIndex = parseInt(btn.dataset.question);
+            const optIndex = parseInt(btn.dataset.option);
 
-            // Add click handlers for options
-            document.querySelectorAll('.option-button').forEach(button => {
-                button.addEventListener('click', () => {
-                    const questionIndex = parseInt(button.dataset.question);
-                    const optionIndex = parseInt(button.dataset.option);
+            document.querySelectorAll(`.option-button[data-question="${qIndex}"]`)
+                .forEach(el => el.classList.remove('selected'));
 
-                    // Remove selection from other options in the same question
-                    document.querySelectorAll(`.option-button[data-question="${questionIndex}"]`)
-                        .forEach(opt => opt.classList.remove('selected'));
+            btn.classList.add('selected');
+            userAnswers[qIndex] = optIndex;
+        });
+    });
+}
+// 7.1.23 Nhấn nút Hoàn thành
+function submitQuiz() {
+    let score = 0;
+    questions.forEach((q, index) => {
+        const chosen = q.options[userAnswers[index]];
+        // 7.1.24 So sánh đáp án với correctAnswer
+        const isCorrect = chosen === q.correctAnswer;
+        if (isCorrect) score++;
 
-                    button.classList.add('selected');
-                    userAnswers[questionIndex] = optionIndex;
-                });
-            });
-        }
+        document.querySelectorAll(`.option-button[data-question="${index}"]`).forEach(btn => {
+            const text = btn.textContent.trim();
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
 
-        function submitQuiz() {
-            if (userAnswers.length !== questions.length) {
-                alert('Please answer all questions!');
-                return;
-            }
+            if (text === q.correctAnswer) newBtn.classList.add('correct');
+            else if (text === chosen) newBtn.classList.add('incorrect');
+        });
+    });
+    // 7.1.25 Hiển thị điểm và đáp án
+    const percentage = Math.round(score / questions.length * 100);
+    document.getElementById('score').textContent = `Điểm: ${percentage}%`;
+    document.getElementById('result-section').style.display = 'block';
+    document.getElementById('submit-button').style.display = 'none';
 
-            let score = 0;
-            questions.forEach((q, index) => {
-                const userAnswer = q.options[userAnswers[index]];
-                const isCorrect = userAnswer === q.correctAnswer;
-                if (isCorrect) score++;
+}
+ // 7.1.27 Gọi lại API tạo quiz
+async function resetQuiz() {
+    document.getElementById('questions-container').innerHTML = '';
+    document.getElementById('result-section').style.display = 'none';
+    questions = [];
+    userAnswers = [];
+    window.extractedQuestions = null;
 
-                // Show correct/incorrect answers
-                document.querySelectorAll(`.option-button[data-question="${index}"]`).forEach(button => {
-                    const optionText = button.textContent.trim();
-                    if (optionText === q.correctAnswer) {
-                        button.classList.add('correct');
-                    } else if (optionText === userAnswer) {
-                        button.classList.add('incorrect');
-                    }
-                });
-            });
-
-            const percentage = (score / questions.length) * 100;
-            document.getElementById('score').textContent = `Score: ${percentage}%`;
-            document.getElementById('result-section').style.display = 'block';
-        }
-
-        function resetQuiz() {
-            document.getElementById('text-input').value = '';
-            document.querySelector('.input-section').style.display = 'block';
-            document.getElementById('quiz-section').style.display = 'none';
-            document.getElementById('result-section').style.display = 'none';
-            questions = [];
-            userAnswers = [];
-        }
+    const loading = document.getElementById('reset-loading');
+    loading.className = 'loading';
+    loading.innerHTML = '<span class="material-symbols-rounded">sync</span> Đang tạo câu hỏi...';
+    loading.style.display = 'block';
+    await generateQuiz();
+    loading.style.display = 'none';
+     document.getElementById('submit-button').style.display = 'flex';
+    window.scrollTo(0, 0);
+}
 
 
-        function resetSummary() {
-            document.getElementById('text-input').value = '';
-            document.querySelector('.input-section').style.display = 'block';
-            document.getElementById('summary-section').style.display = 'none';
-        }
+function resetText() {
+    // Reset text input
+    document.getElementById('text-input').value = '';
+    // Show upload section
+    document.querySelector('.input-section').style.display = 'block';
+    // Hide all other sections
+    document.getElementById('quiz-section').style.display = 'none';
+    document.getElementById('result-section').style.display = 'none';
+    document.getElementById('summary-section').style.display = 'none';
+    // Clear quiz content
+    document.getElementById('questions-container').innerHTML = '';
+    document.getElementById('score').innerHTML = '';
+    document.getElementById('summary-content').innerHTML = '';
+    // Reset file input and file info
+    document.getElementById('document-input').value = '';
+    document.getElementById('file-info').innerHTML = '';
+    // Clear variables
+    window.questions = [];
+    window.userAnswers = [];
+    window.extractedQuestions = null;
+    window.scrollTo(0, 0);
+}
+
+        
