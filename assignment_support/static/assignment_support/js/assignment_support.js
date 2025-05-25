@@ -50,7 +50,6 @@
 
         
         // Subject selection
-        // 5.1.7: Người dùng chọn môn học (Toán, Lý, Hóa, Lập trình)
         document.querySelectorAll('.subject-button-as').forEach(button => {
             button.addEventListener('click', () => {
                 document.querySelectorAll('.subject-button-as').forEach(btn => btn.classList.remove('active'));
@@ -104,6 +103,10 @@
         });
 
         function handleImage(file) {
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Ảnh quá lớn (trên 20MB). Vui lòng chọn ảnh khác.');
+                return;
+            }
             const reader = new FileReader();
             reader.onload = (e) => {
                 previewImage.src = e.target.result;
@@ -120,7 +123,6 @@
             imageUploadArea.querySelector('.upload-placeholder-as').style.display = 'flex';
         }
 
-        // 5.1.8: Người dùng nhập bài tập dạng văn bản hoặc tải hình ảnh
         // LaTeX preview
         document.getElementById('input-text-as').addEventListener('input', () => {
             const text = document.getElementById('input-text-as').value;
@@ -130,8 +132,8 @@
                 MathJax.typesetPromise([preview]);
             }
         });
-        // 5.1.9: Người dùng chọn chế độ "Xem gợi ý" hoặc "Giải bài tập"
-        // 5.1.1010: Trình duyệt gửi POST request với nội dung bài tập, hình ảnh, môn học, chế độ
+        
+        // 5.1.10: Trình duyệt gửi POST request với nội dung bài tập, hình ảnh, môn học, chế độ
         // xem gợi ý
         // Get hint
         async function getHint() {
@@ -167,6 +169,11 @@
                 alert('Vui lòng nhập đề bài cần giải');
                 return;
             }
+            // trên 1000 kí tự 
+            if (inputText.length > 1000) {
+                alert('Đề bài quá dài (trên 1000 ký tự). Vui lòng rút gọn và nhập lại.');
+                return;
+            }
 
             loading.style.display = 'block';
             hintContainer.style.display = 'none';
@@ -181,7 +188,7 @@
                     })
                 });
                 
-                // 5.1.144: Django view trả về JSON chứa kết quả
+          
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error.message);
 
@@ -229,7 +236,7 @@
                 showCurrentHint();
             }
         }
-        // 5.1.9: Người dùng chọn chế độ "Xem gợi ý" hoặc "Giải bài tập"
+      
         // 5.1.10: Trình duyệt gửi POST request với nội dung bài tập, hình ảnh, môn học, chế độ
         // giải bài tập
         async function solveExercise() {
@@ -255,7 +262,7 @@
                         subject : currentSubject
                     })
                 });
-                // 5.1.14: Django view trả về JSON chứa kết quả
+                
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error.message);
 
@@ -277,10 +284,7 @@
                 hintContainer.style.display = 'block';
             }
         }
-        
-        // 5.1.11: Nếu là ảnh, hệ thống xử lý để trích xuất nội dung
-        // 5.1.12: Tạo prompt phù hợp gửi đến Gemini API
-        // 5.1.13: Gemini API trả về kết quả    
+         
         async function convertImageToText(imageFile) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -299,7 +303,6 @@
                                 data: base64Image
                             })
                         });
-                        // 5.1.14: Django view trả về JSON chứa kết quả
                         const data = await response.json();
                         if (!response.ok) {
                             throw new Error(data.error?.message || 'Lỗi khi xử lý hình ảnh');
