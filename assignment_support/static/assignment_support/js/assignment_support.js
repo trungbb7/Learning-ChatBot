@@ -48,7 +48,6 @@ document.body.setAttribute("data-theme", savedTheme);
 updateThemeIcon();
 
 // Subject selection
-// 5.1.7: Người dùng chọn môn học (Toán, Lý, Hóa, Lập trình)
 document.querySelectorAll(".subject-button-as").forEach((button) => {
   button.addEventListener("click", () => {
     document
@@ -113,6 +112,10 @@ imageInput.addEventListener("change", (e) => {
 });
 
 function handleImage(file) {
+  if (file.size > 10 * 1024 * 1024) {
+    alert("Ảnh quá lớn (trên 20MB). Vui lòng chọn ảnh khác.");
+    return;
+  }
   const reader = new FileReader();
   reader.onload = (e) => {
     previewImage.src = e.target.result;
@@ -131,7 +134,6 @@ function removeImage() {
     "flex";
 }
 
-// 5.1.8: Người dùng nhập bài tập dạng văn bản hoặc tải hình ảnh
 // LaTeX preview
 document.getElementById("input-text-as").addEventListener("input", () => {
   const text = document.getElementById("input-text-as").value;
@@ -141,8 +143,8 @@ document.getElementById("input-text-as").addEventListener("input", () => {
     MathJax.typesetPromise([preview]);
   }
 });
-// 5.1.9: Người dùng chọn chế độ "Xem gợi ý" hoặc "Giải bài tập"
-// 5.1.1010: Trình duyệt gửi POST request với nội dung bài tập, hình ảnh, môn học, chế độ
+
+// 5.1.10: Trình duyệt gửi POST request với nội dung bài tập, hình ảnh, môn học, chế độ
 // xem gợi ý
 // Get hint
 async function getHint() {
@@ -179,6 +181,11 @@ async function getHint() {
     alert("Vui lòng nhập đề bài cần giải");
     return;
   }
+  // trên 1000 kí tự
+  if (inputText.length > 1000) {
+    alert("Đề bài quá dài (trên 1000 ký tự). Vui lòng rút gọn và nhập lại.");
+    return;
+  }
 
   loading.style.display = "block";
   hintContainer.style.display = "none";
@@ -193,15 +200,12 @@ async function getHint() {
       }),
     });
 
-    // 5.1.144: Django view trả về JSON chứa kết quả
     const data = await response.json();
     if (!response.ok) throw new Error(data.error.message);
 
     const hint = data.hints;
-    console.log(hint);
-    hints = hint
-      .filter((line) => line.trim())
-      .map((line) => replace$(line.trim().replace(/^-\s*/, "")));
+    console.log("hint: ", hint);
+    hints = hint.map((line) => line.trim().replace(/^-\s*/, ""));
     currentHintNumber = 1;
     showCurrentHint();
   } catch (error) {
@@ -243,7 +247,7 @@ function getNextHint() {
     showCurrentHint();
   }
 }
-// 5.1.9: Người dùng chọn chế độ "Xem gợi ý" hoặc "Giải bài tập"
+
 // 5.1.10: Trình duyệt gửi POST request với nội dung bài tập, hình ảnh, môn học, chế độ
 // giải bài tập
 async function solveExercise() {
@@ -269,13 +273,13 @@ async function solveExercise() {
         subject: currentSubject,
       }),
     });
-    // 5.1.14: Django view trả về JSON chứa kết quả
+
     const data = await response.json();
     if (!response.ok) throw new Error(data.error.message);
 
     solution = data.hints;
 
-    console.log(`solution: ${replace$(solution)}`);
+    console.log(`solution: ${solution}`);
     // 5.1.15: Trình duyệt hiển thị gợi ý / lời giải
     // hiển thị lời giải
     hintContent.innerHTML = preserveLaTeX(solution);
@@ -292,9 +296,6 @@ async function solveExercise() {
   }
 }
 
-// 5.1.11: Nếu là ảnh, hệ thống xử lý để trích xuất nội dung
-// 5.1.12: Tạo prompt phù hợp gửi đến Gemini API
-// 5.1.13: Gemini API trả về kết quả
 async function convertImageToText(imageFile) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -313,7 +314,6 @@ async function convertImageToText(imageFile) {
             data: base64Image,
           }),
         });
-        // 5.1.14: Django view trả về JSON chứa kết quả
         const data = await response.json();
         if (!response.ok) {
           throw new Error(data.error?.message || "Lỗi khi xử lý hình ảnh");
@@ -342,24 +342,4 @@ function clearText() {
   removeImage();
   currentHintNumber = 1;
   hints = [];
-}
-
-function replace$(text) {
-  const splitedText = text.split("$");
-  console.log(splitedText);
-  const isFirst = splitedText[0] === "";
-  let result = "";
-  for (let i = 0; i < splitedText.length; i++) {
-    if (i % 2 === 0) {
-      // if (isFirst) {
-      result += `${splitedText[i]}\\(`;
-      // }
-    } else {
-      result += `${splitedText[i]}\\)`;
-    }
-  }
-  if (result.endsWith("\\(")) {
-    result = result.slice(0, -2);
-  }
-  return result;
 }
