@@ -38,6 +38,7 @@ def assignment_support(request):
     # 5.1.5 Respone trang html “Trợ lí giải bài tập”
     return tempalate
 
+
 # 5.1.11. Django view nhận request, nếu là ảnh thì xử lý để trích xuất nội dung,lấy dữ liệu từ request.
 @csrf_exempt
 def suggest(request):
@@ -46,8 +47,8 @@ def suggest(request):
         text = body.get("text")
         sub = body.get("subject")
         print(sub)
-        image_base64 = body.get('image_base64') or body.get('data')  
-# ảnh thì xử lý để trích xuất nội dung
+        image_base64 = body.get("image_base64") or body.get("data")
+        # ảnh thì xử lý để trích xuất nội dung
 
         if image_base64:
             # extract ảnh thành văn bản
@@ -68,14 +69,17 @@ def suggest(request):
             ]
 
             response_extract = client.models.generate_content(
-                model=GEMINI_MODEL, contents=contents
+                model=GEMINI_MODEL,
+                contents=contents,
+                config=genai.types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=HintModel,
+                ),
             )
 
-            print("response ",response_extract.text)
-            return JsonResponse({
-                'hints': response_extract.text
-            }) 
+            data_hints = json.loads(response_extract.text)
 
+            return JsonResponse({"hints": data_hints["hints"]})
 
         if not text:
             return JsonResponse({"error": "Không có nội dung bài toán."}, status=400)
@@ -105,11 +109,11 @@ def suggest(request):
         )
         # // 5.1.13: Gemini API trả về kết quả
         print("Suggested hints:", response_hint.text)
+        data_hints = json.loads(response_hint.text)
         # // 5.1.14: Django view trả về JSON chứa kết quả
-        return JsonResponse({
-            'hints': response_hint.text
-        })
+        return JsonResponse({"hints": data_hints["hints"]})
     # 5.1.11. Django view nhận request, nếu là ảnh thì xử lý để trích xuất nội dung,lấy dữ liệu từ request.
+
 
 @csrf_exempt
 def handle_exercise(request):
@@ -135,13 +139,9 @@ def handle_exercise(request):
 
         response = client.models.generate_content(
             model=GEMINI_MODEL,
-            contents = prompt,
-           
+            contents=prompt,
         )
-        # // 5.1.13: Gemini API trả về kết quả 
-        print("response ",response.text)
+        # // 5.1.13: Gemini API trả về kết quả
+        print("response ", response.text)
         # // 5.1.14: Django view trả về JSON chứa kết quả
-        return JsonResponse({
-            'hints': response.text
-        })
-
+        return JsonResponse({"hints": response.text})
